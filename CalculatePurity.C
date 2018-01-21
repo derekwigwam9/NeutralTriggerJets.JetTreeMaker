@@ -32,6 +32,7 @@ static const UInt_t NMatchMax(10);
 static const UInt_t NHotTwr(302);
 static const UInt_t NBadRuns(45);
 static const UInt_t NBins(4);
+static const UInt_t NHist(NBins - 1);
 static const UInt_t NTrgs(2);
 
 
@@ -44,7 +45,7 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
 
 
   // io parameters
-  const TString sOutput("test.root");
+  const TString sOutput("pp200r9.purityTest.d20m1y2018.root");
   const TString sInput("input/pp200r9.merge.root");
 
   // event parameters
@@ -62,13 +63,13 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   const Double_t rFitMin(0.52);
   const Double_t dcaMax(1.);
   const Double_t hTrkMax(1.);
-  const Double_t pTtrkMin(0.2);
+  const Double_t pTtrkMin(1.);
   const Double_t pTtrkMax(20.);
 
   // calculation parameters
   const Double_t dFnear(0.);
   const Double_t dFaway(TMath::Pi());
-  const Double_t dFsize(0.79);
+  const Double_t dFsize(0.63);
   const Double_t sigNear(0.02);
   const Double_t sigAway(0.035);
 
@@ -515,6 +516,7 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   // define trigger bins
   const Double_t eTtrgMin[NBins] = {9., 9., 11., 15.};
   const Double_t eTtrgMax[NBins] = {20., 11., 15., 20.};
+  const Double_t eTtrgBin[NBins] = {9., 11., 15., 20.};
   const Double_t tspMin[NTrgs]   = {0., 0.2};
   const Double_t tspMax[NTrgs]   = {0.08, 0.6};
 
@@ -535,7 +537,7 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   const UInt_t   nH  = 40;
   const UInt_t   nPt = 40;
   const UInt_t   nZt = 20;
-  const Double_t dF[2] = {-1.57, 3.71};
+  const Double_t dF[2] = {-1.57, 4.71};
   const Double_t h[2]  = {-1., 1.};
   const Double_t pT[2] = {0., 40.};
   const Double_t zT[2] = {0., 1.};
@@ -590,8 +592,7 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   }
 
 
-  const UInt_t nEvts = 100000;
-  //const UInt_t nEvts = tInput -> GetEntriesFast();
+  const UInt_t nEvts = tInput -> GetEntriesFast();
   cout << "    Beginning event loop: " << nEvts << " events to process." << endl;
 
   // no. of triggers
@@ -757,10 +758,10 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
    // normalize histograms
    for (UInt_t iBin = 0; iBin < NBins; iBin++) {
      for (UInt_t iTrg = 0; iTrg < NTrgs; iTrg++) {
-       const Double_t dFbin  = hDeltaPhi[iBin][iTrg];
-       const Double_t hBin   = hEtaTrk[iBin][iTrg];
-       const Double_t pTbin  = hPtTrk[iBin][iTrg];
-       const Double_t zTbin  = hZtTrk[iBin][iTrg];
+       const Double_t dFbin  = hDeltaPhi[iBin][iTrg] -> GetBinWidth(17);
+       const Double_t hBin   = hEtaTrk[iBin][iTrg]   -> GetBinWidth(17);
+       const Double_t pTbin  = hPtTrk[iBin][iTrg]    -> GetBinWidth(17);
+       const Double_t zTbin  = hZtTrk[iBin][iTrg]    -> GetBinWidth(17);
        const Double_t dFnorm = dFbin * nTrgBin[iBin][iTrg];
        const Double_t hNorm  = hBin * nTrgBin[iBin][iTrg];
        const Double_t pTnorm = pTbin * nTrgBin[iBin][iTrg];
@@ -836,6 +837,85 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   }
 
 
+  // calculate yields
+  Double_t content(0.);
+  Double_t corrected(0.);
+  Double_t error(0.);
+  Double_t yieldNS[NBins][NTrgs];
+  Double_t errorNS[NBins][NTrgs];
+  for (UInt_t iBin = 0; iBin < NBins; iBin++) {
+    for (UInt_t iTrg = 0; iTrg < NTrgs; iTrg++) {
+      yieldNS[iBin][iTrg] = 0.;
+      errorNS[iBin][iTrg] = 0.;
+    }
+  }
+  for (UInt_t iBin = 0; iBin < NBins; iBin++) {
+    for (UInt_t iTrg = 0; iTrg < NTrgs; iTrg++) {
+      const Double_t dFlow   = dFnear - dFsize;
+      const Double_t dFhigh  = dFnear + dFsize;
+      const UInt_t   lowBin  = hDeltaPhi[iBin][iTrg] -> FindBin(dFlow);
+      const UInt_t   highBin = hDeltaPhi[iBin][iTrg] -> FindBin(dFhigh);
+      for (UInt_t iPhi = lowBin; iPhi <= highBin; iPhi++) {
+        content   = hDeltaPhi[iBin][iTrg] -> GetBinContent(iPhi);
+        error     = hDeltaPhi[iBin][iTrg] -> GetBinError(iPhi);
+        corrected = content - pedestal[iBin][iTrg];
+        if (content > 0.) {
+          yieldNS[iBin][iTrg] += corrected;
+          errorNS[iBin][iTrg] += (error * error);
+        }
+      }
+      errorNS[iBin][iTrg] = TMath::Sqrt(errorNS[iBin][iTrg]);
+    }
+  }
+  cout << "    Calculated yields." << endl;
+
+
+  // calculate R
+  Double_t value(0.);
+  Double_t errorSum(0.);
+  Double_t errorVal(0.);
+  Double_t errorTrg[NTrgs];
+  Double_t valueR[NBins];
+  Double_t errorR[NBins];
+  for (UInt_t iBin = 0; iBin < NBins; iBin++) {
+    if ((yieldNS[iBin][0] > 0.) && (yieldNS[iBin][1] > 0.)) {
+      value        = yieldNS[iBin][1] / yieldNS[iBin][0];
+      errorTrg[0]  = errorNS[iBin][0] / yieldNS[iBin][0];
+      errorTrg[1]  = errorNS[iBin][1] / yieldNS[iBin][1];
+      errorSum     = (errorTrg[0] * errorTrg[0]) + (errorTrg[1] * errorTrg[1]);
+      errorVal     = value * TMath::Sqrt(errorSum);
+      valueR[iBin] = value;
+      errorR[iBin] = errorVal;
+    }
+    else {
+      valueR[iBin] = 0.;
+      errorR[iBin] = 0.;
+    }
+  }
+  cout << "    Calculated R." << endl;
+  for (UInt_t iBin = 0; iBin < NBins; iBin++) {
+    cout << "      Bin [" << iBin << "]: R = " << valueR[iBin] << endl;
+  }
+
+  // make R histogram
+  const UInt_t fColR(879);
+  const UInt_t fStyR(10);
+  const UInt_t fSizR(4);
+
+  TH1D *hPurity = new TH1D("hPurity", "", NHist, eTtrgBin);
+  hPurity -> Sumw2();
+  for (UInt_t iHist = 1; iHist < NHist + 1; iHist++) {
+    hPurity -> SetBinContent(iHist, valueR[iHist]);
+    hPurity -> SetBinError(iHist, errorR[iHist]);
+  }
+
+  TLine *lAverage = new TLine(eTtrgBin[0], valueR[0], eTtrgBin[NHist], valueR[0]);
+  lAverage -> SetLineColor(fColR);
+  lAverage -> SetLineStyle(fStyR);
+  lAverage -> SetLineWidth(fSizR);
+  cout << "    Made R histogram..." << endl;
+
+
   // set styles
   const UInt_t  fMar(20);
   const UInt_t  fTxt(42);
@@ -846,7 +926,9 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   const UInt_t  fCol[NTrgs] = {859, 899};
   const Float_t fLab(0.03);
   const TString sTitleX("#Delta#varphi^{trk} = #varphi^{trk} - #varphi^{trg}");
-  const TString sTitleY("counts");
+  const TString sTitleY("D^{NS}_{pp}");
+  const TString sTitleXR("E_{T}^{trg} [GeV]");
+  const TString sTitleYR("R = D^{NS}_{pp}(#gamma^{rich}) / D^{NS}_{pp}(#pi^{0})");
   const TString sTitle[NTrgs] = {"#pi^{0} trigger", "#gamma^{rich} trigger"};
   for (UInt_t iBin = 0; iBin < NBins; iBin++) {
     for (UInt_t iTrg = 0; iTrg < NTrgs; iTrg++) {
@@ -882,17 +964,124 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
       hDeltaPhiNS[iBin][iTrg] -> GetYaxis() -> CenterTitle(fCnt);
       hDeltaPhiNS[iBin][iTrg] -> GetYaxis() -> SetLabelSize(fLab);
 
+      // R histogram
+      hPurity -> SetMarkerStyle(fMar);
+      hPurity -> GetXaxis() -> SetTitle(sTitleXR.Data());
+      hPurity -> GetXaxis() -> SetTitleFont(fTxt);
+      hPurity -> GetXaxis() -> CenterTitle(fCnt);
+      hPurity -> GetXaxis() -> SetLabelSize(fLab);
+      hPurity -> GetYaxis() -> SetTitle(sTitleYR.Data());
+      hPurity -> GetYaxis() -> SetTitleFont(fTxt);
+      hPurity -> GetYaxis() -> CenterTitle(fCnt);
+      hPurity -> GetYaxis() -> SetLabelSize(fLab);
+      hPurity -> GetYaxis() -> SetRangeUser(0., 1.);
+
     }
   }
   cout << "    Set styles." << endl;
 
 
+  // make label
+  const UInt_t  nDec(3);
+  const UInt_t  fColP(0);
+  const UInt_t  fStyP(0);
+  const UInt_t  fAlign(12);
+  const Float_t xyLabel[4] = {0.1, 0.1, 0.3, 0.3};
+  const TString sSystem("pp-collisions, #sqrt{s} = 200 GeV");
+
+  TPaveText *pInfo[NBins][NTrgs];
+  for (UInt_t iBin = 0; iBin < NBins; iBin++) {
+    for (UInt_t iTrg = 0; iTrg < NTrgs; iTrg++) {
+      pInfo[iBin][iTrg] = new TPaveText(xyLabel[0], xyLabel[1], xyLabel[2], xyLabel[3], "NDC NB");
+      pInfo[iBin][iTrg] -> SetFillColor(fColP);
+      pInfo[iBin][iTrg] -> SetFillStyle(fStyP);
+      pInfo[iBin][iTrg] -> SetLineColor(fColP);
+      pInfo[iBin][iTrg] -> SetLineStyle(fStyP);
+      pInfo[iBin][iTrg] -> SetTextFont(fTxt);
+      pInfo[iBin][iTrg] -> SetTextColor(fCol[iTrg]);
+      pInfo[iBin][iTrg] -> SetTextAlign(fAlign);
+
+      // convert into strings
+      TString sPedRaw("");
+      TString sPedTxt("");
+      TString sYieldRaw("");
+      TString sYieldTxt("");
+      sPedRaw   += pedestal[iBin][iTrg];
+      sYieldRaw += yieldNS[iBin][iTrg];
+
+      // display only 3 decimal places
+      const UInt_t nPed      = sPedRaw.First(".");
+      const UInt_t nYield    = sYieldRaw.First(".");
+      const UInt_t nPedTxt   = (nPed + nDec) + 1;
+      const UInt_t nYieldTxt = (nYield + nDec) + 1;
+      sPedTxt.Append(sPedRaw, nPedTxt);
+      sYieldTxt.Append(sYieldRaw, nYieldTxt);
+
+      // create text
+      TString sEtTrg("E_{T}^{trg} #in (");
+      TString sPtTrk("p_{T}^{trk} #in (");
+      TString sPed("ped. = ");
+      TString sYield("yield = ");
+      sEtTrg += eTtrgMin[iBin];
+      sEtTrg += ", ";
+      sEtTrg += eTtrgMax[iBin];
+      sEtTrg += ")";
+      sPtTrk += pTtrkMin;
+      sPtTrk += ", ";
+      sPtTrk += pTtrkMax;
+      sPtTrk += ")";
+      sPed   += sPedTxt;
+      sYield += sYieldTxt;
+
+      // add text
+      pInfo[iBin][iTrg] -> AddText(sSystem.Data());
+      pInfo[iBin][iTrg] -> AddText(sEtTrg.Data());
+      pInfo[iBin][iTrg] -> AddText(sPtTrk.Data());
+      pInfo[iBin][iTrg] -> AddText(sPed.Data());
+      pInfo[iBin][iTrg] -> AddText(sYield.Data());
+    }
+  }
+
+  // make label for R plot
+  TString sEtAvg("E_{T}^{trg} #in (");
+  sEtAvg += eTtrgMin[0];
+  sEtAvg += ", ";
+  sEtAvg += eTtrgMax[0];
+  sEtAvg += ")";
+
+  TString sRraw("");
+  TString sRtxt("");
+  sRraw += valueR[0];
+  sRtxt += "#LTR#GT = ";
+
+  const UInt_t nRraw = sRtxt.First(".");
+  const UInt_t nRtxt = (nRraw + nDec) + 1;
+  sRtxt.Append(sRraw, nRtxt);
+
+  TPaveText *pPurity = new TPaveText(xyLabel[0], xyLabel[1], xyLabel[2], xyLabel[3], "NDC NB");
+  pPurity -> SetFillColor(fColP);
+  pPurity -> SetFillStyle(fStyP);
+  pPurity -> SetLineColor(fColP);
+  pPurity -> SetLineStyle(fStyP);
+  pPurity -> SetTextFont(fTxt);
+  pPurity -> SetTextColor(fColR);
+  pPurity -> SetTextAlign(fAlign);
+  pPurity -> AddText(sSystem.Data());
+  pPurity -> AddText("Line indicates average over E_{T}^{trg}");
+  pPurity -> AddText(sEtAvg.Data());
+  pPurity -> AddText(sRtxt.Data());
+  cout << "    Made labels." << endl;
+
+
   // draw plots
+  const UInt_t  widthR(750);
+  const UInt_t  heightR(750);
   const UInt_t  widthDf(1400);
   const UInt_t  heightDf(750);
   const UInt_t  grid(0);
   const Float_t margin(0.);
   const Float_t xPadDf[NTrgs]     = {0.5, 1.};
+  const TString sRcanvas("cPurity");
   const TString sDfCanvas[NBins] = {"cDeltaPhi_et920", "cDeltaPhi_et911", "cDeltaPhi_et1115", "cDeltaPhi_et1520"};
   const TString sDfPads[NTrgs]   = {"pPi0", "pGamma"};
 
@@ -913,12 +1102,23 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
     pDeltaPhi[iBin][0]   -> cd();
     hDeltaPhi[iBin][0]   -> Draw();
     hDeltaPhiNS[iBin][0] -> Draw("SAME LF HIST");
+    pInfo[iBin][0]       -> Draw();
     pDeltaPhi[iBin][1]   -> cd();
     hDeltaPhi[iBin][1]   -> Draw();
     hDeltaPhiNS[iBin][1] -> Draw("SAME LF HIST");
+    pInfo[iBin][1]       -> Draw();
     cDeltaPhi[iBin]      -> Write();
     cDeltaPhi[iBin]      -> Close();
   }
+
+  TCanvas *cPurity = new TCanvas(sRcanvas.Data(), "", widthR, heightR);
+  cPurity  -> SetGrid(grid, grid);
+  cPurity  -> cd();
+  hPurity  -> Draw();
+  lAverage -> Draw();
+  pPurity  -> Draw();
+  cPurity  -> Write();
+  cPurity  -> Close();
   cout << "    Drew plots." << endl;
 
 
@@ -940,6 +1140,8 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   cout << "    Made directories." << endl;
 
   // close files
+  fOutput -> cd();
+  hPurity -> Write();
   fOutput -> Close();
   fInput  -> cd();
   fInput  -> Close();
