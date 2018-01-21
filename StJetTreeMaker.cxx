@@ -229,8 +229,6 @@ void StJetTreeMaker::Make() {
         dFtrk += TMath::TwoPi();
       if (dFtrk > (3. * TMath::PiOver2()))
         dFtrk -= TMath::TwoPi();
-      // TEST [11.05.2017]
-      const Bool_t isRecoilTrack = (TMath::Abs(dFtrk - TMath::Pi()) < (TMath::PiOver2()));
 
       // track cuts
       const Bool_t isGoodTrk = IsGoodTrack(nFit, rFit, dca, hTrk, pTtrk);
@@ -242,22 +240,12 @@ void StJetTreeMaker::Make() {
         _hTrkQA[1][0] -> Fill(dFtrk);
         _hTrkQA[2][0] -> Fill(hTrk);
         _hTrkQA[3][0] -> Fill(eTrk);
-        // TEST [11.05.2017]
-        _hTrkPt[0][0] -> Fill(pTtrk);
-        if (isRecoilTrack) {
-          _hTrkPt[0][1] -> Fill(pTtrk);
-        }
       }
       if (isGam) {
         _hTrkQA[0][1] -> Fill(pTtrk);
         _hTrkQA[1][1] -> Fill(dFtrk);
         _hTrkQA[2][1] -> Fill(hTrk);
         _hTrkQA[3][1] -> Fill(eTrk);
-        // TEST [11.05.2017]
-        _hTrkPt[1][0] -> Fill(pTtrk);
-        if (isRecoilTrack) {
-          _hTrkPt[1][1] -> Fill(pTtrk);
-        }
       }
       particles.push_back(PseudoJet(pXtrk, pYtrk, pZtrk, eTrk));
 
@@ -282,8 +270,6 @@ void StJetTreeMaker::Make() {
         dFtwr += TMath::TwoPi();
       if (dFtwr > (3. * TMath::PiOver2()))
         dFtwr -= TMath::TwoPi();
-      // TEST [11.05.2017]
-      const Bool_t isRecoilTower = (TMath::Abs(dFtwr - TMath::Pi()) < (TMath::PiOver2()));
 
       // calculate corrected energy
       const Bool_t isMatched    = (fMatch == 1);
@@ -311,10 +297,6 @@ void StJetTreeMaker::Make() {
       // get tower momentum
       const TLorentzVector vTwr = GetTowerMomentumVector(RadiusBemc, hTwr, fTwr, eCorr, vVtx);
 
-      // TEST [11.05.2017]
-      const TLorentzVector vRaw = GetTowerMomentumVector(RadiusBemc, hTwr, fTwr, eTwr, vVtx);
-      const Double_t pTraw = vRaw.Pt();
-
       const Double_t pXtwr = vTwr.Px();
       const Double_t pYtwr = vTwr.Py();
       const Double_t pZtwr = vTwr.Pz();
@@ -324,26 +306,12 @@ void StJetTreeMaker::Make() {
         _hTwrQA[1][0] -> Fill(dFtwr);
         _hTwrQA[2][0] -> Fill(hTwr);
         _hTwrQA[3][0] -> Fill(eCorr);
-        // TEST [11.05.2017]
-        _hTwrPtRaw[0][0]  -> Fill(pTraw);
-        _hTwrPtCorr[0][0] -> Fill(pTtwr);
-        if (isRecoilTower) {
-          _hTwrPtRaw[0][1]  -> Fill(pTraw);
-          _hTwrPtCorr[0][1] -> Fill(pTtwr);
-        }
       }
       if (isGam && !isTrigger) {
         _hTwrQA[0][1] -> Fill(pTtwr);
         _hTwrQA[1][1] -> Fill(dFtwr);
         _hTwrQA[2][1] -> Fill(hTwr);
         _hTwrQA[3][1] -> Fill(eCorr);
-        // TEST [11.05.2017]
-        _hTwrPtRaw[1][0]  -> Fill(pTraw);
-        _hTwrPtCorr[1][0] -> Fill(pTtwr);
-        if (isRecoilTower) {
-          _hTwrPtRaw[1][1]  -> Fill(pTraw);
-          _hTwrPtCorr[1][1] -> Fill(pTtwr);
-        }
       }
       if (_jetType == 1)
         particles.push_back(PseudoJet(pXtwr, pYtwr, pZtwr, eCorr));
@@ -431,6 +399,18 @@ void StJetTreeMaker::Make() {
         dFjet -= TMath::TwoPi();
 
 
+      // off axis cone calculation
+      Double_t pTsum[2]     = {0., 0.};
+      Double_t pTdensity[2] = {0., 0.};
+      GetOffAxisTrackPtSum(nTrks, fTrg, dFjet, hJet, pTsum[0], pTsum[1]);
+      if (_jetType == 1)
+        GetOffAxisTowerPtSum(nTwrs, twrID, fTrg, dFjet, hJet, vVtx, matches, pTsum[0], pTsum[1]);
+
+      const Double_t aCone = (_rJet * _rJet) * TMath::Pi();
+      pTdensity[0] = pTsum[0] / aCone;
+      pTdensity[1] = pTsum[1] / aCone;
+
+
       if (isPi0) {
         _hJetQA[0][0] -> Fill(pTjet);
         _hJetQA[1][0] -> Fill(dFjet);
@@ -451,6 +431,8 @@ void StJetTreeMaker::Make() {
       _JetPhi.push_back(fJet);
       _JetE.push_back(eJet);
       _JetArea.push_back(aJet);
+      _JetPtOffAxisUp.push_back(pTdensity[0]);
+      _JetPtOffAxisDown.push_back(pTdensity[1]);
 
     }  // end jet loop
 
@@ -471,9 +453,6 @@ void StJetTreeMaker::Make() {
       nTrg = (Double_t) nPi0;
     else
       nTrg = (Double_t) nGam;
-
-    // TEST [11.05.2017]
-    nTrg = 1.;
 
     for (UInt_t iHist = 0; iHist < NHistQA; iHist++) {
       const Double_t trkBin   = _hTrkQA[iHist][iTrg] -> GetBinWidth(17);
@@ -500,8 +479,6 @@ void StJetTreeMaker::Finish() {
   TDirectory *dHists = _fOutput -> mkdir("QA");
   TDirectory *dPi0QA = dHists   -> mkdir("Pi0");
   TDirectory *dGamQA = dHists   -> mkdir("Gamma");
-  // TEST [11.05.2017]
-  TDirectory *dTest  = _fOutput -> mkdir("TEST");
   PrintInfo(15);
 
   for (UInt_t iTrg = 0; iTrg < NTrgTypes; iTrg++) {
@@ -515,14 +492,6 @@ void StJetTreeMaker::Finish() {
       _hTwrQA[iHist][iTrg] -> Write();
       _hJetQA[iHist][iTrg] -> Write();
     }
-    // TEST [11.05.2017]
-    dTest -> cd();
-    _hTrkPt[iTrg][0]     -> Write();
-    _hTrkPt[iTrg][1]     -> Write();
-    _hTwrPtRaw[iTrg][0]  -> Write();
-    _hTwrPtRaw[iTrg][1]  -> Write();
-    _hTwrPtCorr[iTrg][0] -> Write();
-    _hTwrPtCorr[iTrg][1] -> Write();
   }
   _fOutput -> cd();
   _tJet    -> Write();

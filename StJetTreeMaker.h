@@ -55,11 +55,6 @@ class StJetTreeMaker {
     TString  _sInput;
     TString  _sOutput;
 
-    // TEST [11.05.2017]
-    TH1D *_hTrkPt[NTrgTypes][2];
-    TH1D *_hTwrPtRaw[NTrgTypes][2];
-    TH1D *_hTwrPtCorr[NTrgTypes][2];
-
     // event parameters
     Int_t    _adcMax;
     Double_t _rVtxMax;
@@ -117,6 +112,8 @@ class StJetTreeMaker {
     vector<Double_t> _JetPhi;
     vector<Double_t> _JetE;
     vector<Double_t> _JetArea;
+    vector<Double_t> _JetPtOffAxisUp;
+    vector<Double_t> _JetPtOffAxisDown;
     // cst. members
     vector<vector<Double_t>> _JetConsPt;
     vector<vector<Double_t>> _JetConsEta;
@@ -410,6 +407,8 @@ class StJetTreeMaker {
     Long64_t       LoadTree(const Long64_t entry);
     Long64_t       GetEntry(const Long64_t entry);
     Double_t       GetHadronicCorrection(const Double_t eTwr, const vector<Double_t> pMatchedTrks);
+    Double_t       GetOffAxisTrackPtSum(const UInt_t nTrks, const Double_t phiTrg, const Double_t deltaPhiJet, const Double_t etaJet, Double_t &pTsumUp, Double_t &pTsumDown);
+    Double_t       GetOffAxisTowerPtSum(const UInt_t nTwrs, const UInt_t idTrg, const Double_t phiTrg, const Double_t deltaPhiJet, const Double_t etaJet, const TVector3& vtx, vector<Double_t> pMatchedTrks, Double_t &pTsumUp, Double_t &pTsumDown);
     TLorentzVector GetTowerMomentumVector(const Double_t rBEMC, const Double_t etaTwr, const Double_t phiTwr, const Double_t eTwr, const TVector3& vtx);
 
 
@@ -450,7 +449,9 @@ StJetTreeMaker::StJetTreeMaker(const Bool_t batch, TTree *tree) : _tFemto(0) {
   _JetEta.clear();
   _JetPhi.clear();
   _JetE.clear();
-  _JetArea.clear();  
+  _JetArea.clear();
+  _JetPtOffAxisUp.clear();
+  _JetPtOffAxisDown.clear();
   _JetConsPt.clear();
   _JetConsEta.clear();
   _JetConsPhi.clear();

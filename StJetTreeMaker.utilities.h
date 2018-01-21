@@ -178,6 +178,8 @@ void StJetTreeMaker::InitializeOutputTree(TTree *tree) {
   _tJet -> Branch("JetPhi", &_JetPhi);
   _tJet -> Branch("JetE", &_JetE);
   _tJet -> Branch("JetArea", &_JetArea);
+  _tJet -> Branch("JetPtOffAxisUp", &_JetPtOffAxisUp);
+  _tJet -> Branch("JetPtOffAxisDown", &_JetPtOffAxisDown);
   _tJet -> Branch("JetConsPt", &_JetConsPt);
   _tJet -> Branch("JetConsEta", &_JetConsEta);
   _tJet -> Branch("JetConsPhi", &_JetConsPhi);
@@ -257,28 +259,6 @@ void StJetTreeMaker::InitializeHistograms() {
     }
   }
   PrintInfo(9);
-
-  // TEST [11.05.2017]
-  _hTrkPt[0][0]     = new TH1D("hTrkPtP_all", "Track p_{T}, #pi^{0}: all", nPt, pT1, pT2);
-  _hTrkPt[0][1]     = new TH1D("hTrkPtP_rec", "Track p_{T}, #pi^{0}: |#Delta#varphi - #pi| < #pi/2", nPt, pT1, pT2);
-  _hTrkPt[1][0]     = new TH1D("hTrkPtG_all", "Track p_{T}, #gamma^{rich}: all", nPt, pT1, pT2);
-  _hTrkPt[1][1]     = new TH1D("hTrkPtG_rec", "Track p_{T}, #gamma^{rich}: |#Delta#varphi - #pi| < #pi/2", nPt, pT1, pT2);
-  _hTwrPtRaw[0][0]  = new TH1D("hTwrPtRawP_all", "Tower p_{T} (raw), #pi^{0}: all", nPt, pT1, pT2);
-  _hTwrPtRaw[0][1]  = new TH1D("hTwrPtRawP_rec", "Tower p_{T} (raw), #pi^{0}: |#Delta#varphi - #pi| < #pi/2", nPt, pT1, pT2);
-  _hTwrPtRaw[1][0]  = new TH1D("hTwrPtRawG_all", "Tower p_{T} (raw), #gamma^{rich}: all", nPt, pT1, pT2);
-  _hTwrPtRaw[1][1]  = new TH1D("hTwrPtRawG_rec", "Tower p_{T} (raw), #gamma^{rich}: |#Delta#varphi - #pi| < #pi/2", nPt, pT1, pT2);
-  _hTwrPtCorr[0][0] = new TH1D("hTwrPtCorrP_all", "Tower p_{T} (corr), #pi^{0}: all", nPt, pT1, pT2);
-  _hTwrPtCorr[0][1] = new TH1D("hTwrPtCorrP_rec", "Tower p_{T} (corr), #pi^{0}: |#Delta#varphi - #pi| < #pi/2", nPt, pT1, pT2);
-  _hTwrPtCorr[1][0] = new TH1D("hTwrPtCorrG_all", "Tower p_{T} (corr), #gamma^{rich}: all", nPt, pT1, pT2);
-  _hTwrPtCorr[1][1] = new TH1D("hTwrPtCorrG_rec", "Tower p_{T} (corr), #gamma^{rich}: |#Delta#varphi - #pi| < #pi/2", nPt, pT1, pT2);
-  for (UInt_t iTrg = 0; iTrg < NTrgTypes; iTrg++) {
-    _hTrkPt[iTrg][0]     -> Sumw2();
-    _hTrkPt[iTrg][1]     -> Sumw2();
-    _hTwrPtRaw[iTrg][0]  -> Sumw2();
-    _hTwrPtRaw[iTrg][1]  -> Sumw2();
-    _hTwrPtCorr[iTrg][0] -> Sumw2();
-    _hTwrPtCorr[iTrg][1] -> Sumw2();
-  }
 
 }  // end 'InitializeHistograms()'
 
@@ -543,6 +523,136 @@ Double_t StJetTreeMaker::GetHadronicCorrection(const Double_t eTwr, const vector
   return eCorr;
 
 }  // end 'GetHadronicCorrection(Double_t, vector<Double_t>)'
+
+
+
+Double_t StJetTreeMaker::GetOffAxisTrackPtSum(const UInt_t nTrks, const Double_t phiTrg, const Double_t deltaPhiJet, const Double_t etaJet, Double_t &pTsumUp, Double_t &pTsumDown) {
+
+  // cone centers
+  const Double_t dFup   = deltaPhiJet + TMath::PiOver2();
+  const Double_t dFdown = deltaPhiJet - TMath::PiOver2(); 
+
+
+  // track loop
+  Double_t pTup   = 0.;
+  Double_t pTdown = 0.;
+  for (UInt_t iTrk = 0; iTrk < nTrks; iTrk++) {
+
+    // track info
+    const UInt_t   nFit  = _PrimaryTrackArray_nHitsFit[iTrk];
+    const UInt_t   nPoss = _PrimaryTrackArray_nHitsPoss[iTrk];
+    const Double_t rFit  = (Double_t) nFit / (Double_t) nPoss;
+    const Double_t dca   = _PrimaryTrackArray_dcag[iTrk];
+    const Double_t hTrk  = _PrimaryTrackArray_eta[iTrk];
+    const Double_t fTrk  = _PrimaryTrackArray_phi[iTrk];
+    const Double_t pTtrk = _PrimaryTrackArray_pT[iTrk];
+
+    Double_t dFtrk = fTrk - phiTrg;
+    if (dFtrk < (-1. * TMath::PiOver2()))
+      dFtrk += TMath::TwoPi();
+    if (dFtrk > (3. * TMath::PiOver2()))
+      dFtrk -= TMath::TwoPi();
+
+    // track cuts
+    const Bool_t isGoodTrk = IsGoodTrack(nFit, rFit, dca, hTrk, pTtrk);
+    if (!isGoodTrk) continue;
+
+
+    // calculate delta's
+    const Double_t dHcone    = hTrk - etaJet;
+    const Double_t dFcone[2] = {dFtrk - dFup, dFtrk - dFdown};
+    const Double_t dRcone[2] = {sqrt((dHcone * dHcone) + (dFcone[0] * dFcone[0])), sqrt((dHcone * dHcone) + (dFcone[1] * dFcone[1]))};
+
+    // sum pT in cones
+    const Bool_t isInCone[2] = {(dRcone[0] < _rJet), (dRcone[1] < _rJet)};
+    if (isInCone[0]) pTup   += pTtrk;
+    if (isInCone[1]) pTdown += pTtrk;
+
+  }  // end track loop
+
+
+  // assign sums
+  pTsumUp   += pTup;
+  pTsumDown += pTdown;
+  return 1.;
+
+}  // end 'GetOffAxisTrackPtSum(UInt_t, Double_t, Double_t, Double_t, Double_t&, Double_t&)'
+
+
+
+Double_t StJetTreeMaker::GetOffAxisTowerPtSum(const UInt_t nTwrs, const UInt_t idTrg, const Double_t phiTrg, const Double_t deltaPhiJet, const Double_t etaJet, const TVector3& vtx, vector<Double_t> pMatchedTrks, Double_t &pTsumUp, Double_t &pTsumDown) {
+
+  // cone centers
+  const Double_t dFup   = deltaPhiJet + TMath::PiOver2();
+  const Double_t dFdown = deltaPhiJet - TMath::PiOver2();
+ 
+
+  // tower loop
+  Double_t pTup   = 0.;
+  Double_t pTdown = 0.;
+  for (UInt_t iTwr = 0; iTwr < nTwrs; iTwr++) {
+
+    // tower info
+    const Int_t    tID    = _TowerArray_TwrId[NTwrMax];
+    const UInt_t   fMatch = _TowerArray_TwrMatchIdnex[iTwr];
+    const UInt_t   nMatch = _TowerArray_NoOfmatchedTrk[iTwr];
+    const Double_t hTwr   = _TowerArray_TwrEta[iTwr];
+    const Double_t fTwr   = _TowerArray_TwrPhi[iTwr];
+    const Double_t eTwr   = _TowerArray_TwrEng[iTwr];
+
+    Double_t eCorr = -999.;
+    Double_t dFtwr = fTwr - phiTrg;
+    if (dFtwr < (-1. * TMath::PiOver2()))
+      dFtwr += TMath::TwoPi();
+    if (dFtwr > (3. * TMath::PiOver2()))
+      dFtwr -= TMath::TwoPi();
+
+    // calculate corrected energy
+    const Bool_t isMatched    = (fMatch == 1);
+    const Bool_t isNotMatched = (fMatch == 0);
+    const Bool_t hasMatches   = (nMatch >= 1);
+    const Bool_t hasNoMatches = (nMatch == 0);
+    pMatchedTrks.clear();
+    if (isMatched && hasMatches) {
+      for (UInt_t iMatch = 0; iMatch < nMatch; iMatch++) {
+        const Double_t pMatch = _TowerArray_fMatchedTracksArray_P[iTwr][iMatch];
+        pMatchedTrks.push_back(pMatch);
+      }
+      eCorr = GetHadronicCorrection(eTwr, pMatchedTrks);
+    }
+    else if (isNotMatched && hasNoMatches) {
+      eCorr = eTwr;
+    }
+
+    // tower cuts
+    const Bool_t isTrigger = (tID == idTrg);
+    const Bool_t isGoodTwr = IsGoodTower(hTwr, eTwr, eCorr);
+    if (isTrigger || !isGoodTwr) continue;
+
+
+    // get tower momentum
+    const TLorentzVector vTwr  = GetTowerMomentumVector(RadiusBemc, hTwr, fTwr, eCorr, vtx);
+    const Double_t       pTtwr = vTwr.Pt();
+
+    // calculate delta's
+    const Double_t dHcone    = hTwr - etaJet;
+    const Double_t dFcone[2] = {dFtwr - dFup, dFtwr - dFdown};
+    const Double_t dRcone[2] = {sqrt((dHcone * dHcone) + (dFcone[0] * dFcone[0])), sqrt((dHcone * dHcone) + (dFcone[1] * dFcone[1]))};
+
+    // sum pT in cones
+    const Bool_t isInCone[2] = {(dRcone[0] < _rJet), (dRcone[1] < _rJet)};
+    if (isInCone[0]) pTup   += pTtwr;
+    if (isInCone[1]) pTdown += pTtwr;
+
+  }  // end tower loop
+
+
+  // assign sums
+  pTsumUp   += pTup;
+  pTsumDown += pTdown;
+  return 1.;
+
+}  // end 'GetOffAxisTowerPtSum(UInt_t, UInt_t, Double_t, Double_t, Double_t, TVector3&, vector<Double_t>, Double_t&, Double_t&)'
 
 
 
