@@ -62,7 +62,7 @@ void ReadJetTree(Bool_t inBatchMode=false) {
   }
 
 
-  // declare Geant event leaves
+  // event leaves
   cout << "  Setting branch addresses..." << endl;
   Int_t    EventIndex = 0;
   Int_t    NJets      = 0;
@@ -74,51 +74,51 @@ void ReadJetTree(Bool_t inBatchMode=false) {
   Double_t Rho        = 0.;
   Double_t Sigma      = 0.;
   Double_t Vz         = 0.;
-  // declare Geant jet leaves
-  vector<Double_t> *JetEta    = 0;
-  vector<Double_t> *JetPt     = 0;
-  vector<Double_t> *JetNCons  = 0;
-  vector<Double_t> *JetIndex  = 0;
-  vector<Double_t> *JetPtCorr = 0;
-  vector<Double_t> *JetEta    = 0;
-  vector<Double_t> *JetPhi    = 0;
-  vector<Double_t> *JetE      = 0;
-  vector<Double_t> *JetArea   = 0;
-  // declare Geant constituent leaves
+  // jet leaves
+  vector<Double_t> *JetEta           = 0;
+  vector<Double_t> *JetPt            = 0;
+  vector<Double_t> *JetNCons         = 0;
+  vector<Double_t> *JetIndex         = 0;
+  vector<Double_t> *JetPtCorr        = 0;
+  vector<Double_t> *JetEta           = 0;
+  vector<Double_t> *JetPhi           = 0;
+  vector<Double_t> *JetE             = 0;
+  vector<Double_t> *JetArea          = 0;
+  vector<Double_t> *JetPtOffAxisUp   = 0;
+  vector<Double_t> *JetPtOffAxisDown = 0;
+  // constituent leaves
   vector<vector<Double_t>> *JetConsPt  = 0;
   vector<vector<Double_t>> *JetConsEta = 0;
   vector<vector<Double_t>> *JetConsPhi = 0;
   vector<vector<Double_t>> *JetConsE   = 0;
-  
-
 
   // declare Geant branches
-  TBranch *bEventIndex = 0;
-  TBranch *bNJets      = 0;
-  TBranch *bRefmult    = 0;
-  TBranch *bTsp        = 0;
-  TBranch *bTrgEta     = 0;
-  TBranch *bTrgPhi     = 0;
-  TBranch *bTrgEt      = 0;
-  TBranch *bRho        = 0;
-  TBranch *bSigma      = 0;
-  TBranch *bVz         = 0;
-  TBranch *bJetEta     = 0;
-  TBranch *bJetPt      = 0;
-  TBranch *bJetNCons   = 0;
-  TBranch *bJetIndex   = 0;
-  TBranch *bJetPtCorr  = 0;
-  TBranch *bJetEta     = 0;
-  TBranch *bJetPhi     = 0;
-  TBranch *bJetE       = 0;
-  TBranch *bJetArea    = 0;
-  TBranch *bJetConsPt  = 0;
-  TBranch *bJetConsEta = 0;
-  TBranch *bJetConsPhi = 0;
-  TBranch *bJetConsE   = 0;
+  TBranch *bEventIndex       = 0;
+  TBranch *bNJets            = 0;
+  TBranch *bRefmult          = 0;
+  TBranch *bTsp              = 0;
+  TBranch *bTrgEta           = 0;
+  TBranch *bTrgPhi           = 0;
+  TBranch *bTrgEt            = 0;
+  TBranch *bRho              = 0;
+  TBranch *bSigma            = 0;
+  TBranch *bVz               = 0;
+  TBranch *bJetNCons         = 0;
+  TBranch *bJetIndex         = 0;
+  TBranch *bJetPt            = 0;
+  TBranch *bJetPtCorr        = 0;
+  TBranch *bJetEta           = 0;
+  TBranch *bJetPhi           = 0;
+  TBranch *bJetE             = 0;
+  TBranch *bJetArea          = 0;
+  TBranch *bJetPtOffAxisUp   = 0;
+  TBranch *bJetPtOffAxisDown = 0;
+  TBranch *bJetConsPt        = 0;
+  TBranch *bJetConsEta       = 0;
+  TBranch *bJetConsPhi       = 0;
+  TBranch *bJetConsE         = 0;
 
-
-  // set Geant branches
+  // set branches
   JetTree -> SetBranchAddress("eventIndex", &EventIndex, &bEventIndex);
   JetTree -> SetBranchAddress("Refmult", &Refmult, &bRefmult);
   JetTree -> SetBranchAddress("NJets", &NJets, &bNJets);
@@ -128,16 +128,17 @@ void ReadJetTree(Bool_t inBatchMode=false) {
   JetTree -> SetBranchAddress("TrgEt", &TrgEt, &bTrgEt);
   JetTree -> SetBranchAddress("Rho", &Rho, &bRho);
   JetTree -> SetBranchAddress("Sigma", &Sigma, &bSigma);
-  JetTree -> SetBranchAddress("Vz", &Vz,&bVz);
+  JetTree -> SetBranchAddress("Vz", &Vz, &bVz);
   JetTree -> SetBranchAddress("JetIndex", &JetIndex, &bJetIndex);
-  JetTree -> SetBranchAddress("JetEta", &JetEta, &bJetEta);
-  JetTree -> SetBranchAddress("JetPt", &JetPt, &bJetPt);
   JetTree -> SetBranchAddress("JetNCons", &JetNCons, &bJetNCons);
+  JetTree -> SetBranchAddress("JetPt", &JetPt, &bJetPt);
   JetTree -> SetBranchAddress("JetPtCorr", &JetPtCorr, &bJetPtCorr);
   JetTree -> SetBranchAddress("JetEta", &JetEta, &bJetEta);
-  JetTree -> SetBranchAddress("JetPhi",&JetPhi, &bJetPhi); 
+  JetTree -> SetBranchAddress("JetPhi", &JetPhi, &bJetPhi); 
   JetTree -> SetBranchAddress("JetE", &JetE, &bJetE); 
-  JetTree -> SetBranchAddress("JetArea",&JetArea, &bJetArea);
+  JetTree -> SetBranchAddress("JetArea", &JetArea, &bJetArea);
+  JetTree -> SetBranchAddress("JetPtOffAxisUp", &JetPtOffAxisUp, &bJetPtOffAxisUp); 
+  JetTree -> SetBranchAddress("JetPtOffAxisDown", &JetPtOffAxisDown, &bJetPtOffAxisDown); 
   JetTree -> SetBranchAddress("JetConsPt", &JetConsPt, &bJetConsPt);
   JetTree -> SetBranchAddress("JetConsEta", &JetConsEta, &bJetConsEta);
   JetTree -> SetBranchAddress("JetConsPhi", &JetConsPhi, &bJetConsPhi);
