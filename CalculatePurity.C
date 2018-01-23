@@ -533,10 +533,10 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   TH1D *hPtTrk[NBins][NTrgs];
   TH1D *hZtTrk[NBins][NTrgs];
 
-  const UInt_t   nDf = 60;
-  const UInt_t   nH  = 40;
-  const UInt_t   nPt = 40;
-  const UInt_t   nZt = 20;
+  const UInt_t   nDf   = 60;
+  const UInt_t   nH    = 40;
+  const UInt_t   nPt   = 40;
+  const UInt_t   nZt   = 20;
   const Double_t dF[2] = {-1.57, 4.71};
   const Double_t h[2]  = {-1., 1.};
   const Double_t pT[2] = {0., 40.};
@@ -754,6 +754,7 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
        << "      " << nTrgBin[0][0] << " pi0 triggers in total,\n"
        << "      " << nTrgBin[0][1] << " gamma triggers in total."
        << endl;
+
 
    // normalize histograms
    for (UInt_t iBin = 0; iBin < NBins; iBin++) {
@@ -1076,7 +1077,7 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   // draw plots
   const UInt_t  widthR(750);
   const UInt_t  heightR(750);
-  const UInt_t  widthDf(1400);
+  const UInt_t  widthDf(1500);
   const UInt_t  heightDf(750);
   const UInt_t  grid(0);
   const Float_t margin(0.);
