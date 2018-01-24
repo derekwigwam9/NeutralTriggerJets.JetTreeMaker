@@ -51,8 +51,8 @@ void UncorrelatedJetStudy(const Bool_t isInBatchMode=false) {
   cout << "\n  Beginning uncorrelated jet study..." << endl;
 
   // io parameters
-  const TString sOutput("pp200r9.ueStudy.eTtrg920.r05a065rm1full.d23m1y2018.root");
-  const TString sInput("pp200r9.withOaCones.eTtrg920.r05rm1full.d21m1y2018.root");
+  const TString sOutput("pp200r9.ueStudy.eTtrg920.r03a02rm1full.d23m1y2018.root");
+  const TString sInput("pp200r9.withOaCones.eTtrg920.r03rm1full.d21m1y2018.root");
   const TString sTree("JetTree");
 
   // trigger parameters
@@ -61,8 +61,8 @@ void UncorrelatedJetStudy(const Bool_t isInBatchMode=false) {
   const Double_t gamTsp[2] = {0.2, 0.6};
 
   // jet parameters
-  const Double_t rJet(0.5);
-  const Double_t aJetMin(0.65);
+  const Double_t rJet(0.3);
+  const Double_t aJetMin(0.2);
   const Double_t pTjetMin(0.2);
   const Double_t dFrecoil(TMath::PiOver4());
 
@@ -852,30 +852,28 @@ void UncorrelatedJetStudy(const Bool_t isInBatchMode=false) {
   const UInt_t  fColT(0);
   const UInt_t  fFilT(0);
   const UInt_t  fLinT(0);
-  const UInt_t  fSizT(15);
-  const UInt_t  fAlign(17);
+  const UInt_t  fAlign(12);
   const Float_t xyLeg1(0.1);
   const Float_t xyLeg2(0.3);
   const Float_t xyPav1(0.5);
   const Float_t xyPav2(0.7);
   const TString sSystem("pp-collisions, #sqrt{s} = 200 GeV");
-  const TString sTrigger1("E_{T}^{trg} #in (");
-  const TString sTrigger2("), |#eta^{trg}| < 0.9");
+  const TString sTrigger("E_{T}^{trg} #in (");
   const TString sJet("anti-k_{T}, R = ");
   const TString sChrg("#bf{charged jets}");
   const TString sFull("#bf{full jets}");
   const TString sOaName("OA cone");
-  const TString sIdName[NBinsId] = {"#pi^{0}", "#gamma^{rich}"};
+  const TString sIdName[NBinsId] = {"#pi^{0}-jets", "#gamma^{rich}-jets"};
 
   TPaveText *pPtJet[NBinsEt];
   TLegend   *lPtJet[NBinsId];
   for (UInt_t iBinEt = 0; iBinEt < NBinsEt; iBinEt++) {
-    TString sEtTrg(sTrigger1.Data());
+    TString sEtTrg(sTrigger.Data());
     TString sJetStuff(sJet.Data());
     sEtTrg    += eTtrgMin[iBinEt];
     sEtTrg    += ", ";
     sEtTrg    += eTtrgMax[iBinEt];
-    sEtTrg    += sTrigger2.Data();
+    sEtTrg    += ") GeV";
     sJetStuff += rJet;
 
     pPtJet[iBinEt] = new TPaveText(xyPav1, xyPav1, xyPav2, xyPav2, "NDC NB");
@@ -885,7 +883,6 @@ void UncorrelatedJetStudy(const Bool_t isInBatchMode=false) {
     pPtJet[iBinEt] -> SetLineStyle(fLinT);
     pPtJet[iBinEt] -> SetTextFont(fTxt);
     pPtJet[iBinEt] -> SetTextAlign(fAlign);
-    pPtJet[iBinEt] -> SetTextSize(fSizT);
     pPtJet[iBinEt] -> AddText(sSystem.Data());
     pPtJet[iBinEt] -> AddText(sEtTrg.Data());
     pPtJet[iBinEt] -> AddText(sJetStuff.Data());
@@ -901,13 +898,13 @@ void UncorrelatedJetStudy(const Bool_t isInBatchMode=false) {
     lPtJet[iBinId] -> SetLineColor(fColT);
     lPtJet[iBinId] -> SetLineStyle(fLinT);
     lPtJet[iBinId] -> SetTextFont(fTxt);
-    lPtJet[iBinId] -> SetTextSize(fTxt);
     lPtJet[iBinId] -> AddEntry(hPtRE[0][iBinId], sIdName[iBinId].Data());
     lPtJet[iBinId] -> AddEntry(hPtUE[0][iBinId][0], sDfBins[0].Data());
     lPtJet[iBinId] -> AddEntry(hPtUE[0][iBinId][1], sDfBins[1].Data());
     lPtJet[iBinId] -> AddEntry(hPtUE[0][iBinId][2], sDfBins[2].Data());
     lPtJet[iBinId] -> AddEntry(hPtOA[0][iBinId][2], sOaName.Data());
   }
+  cout << "    Made labels." << endl;
 
 
   // make line
