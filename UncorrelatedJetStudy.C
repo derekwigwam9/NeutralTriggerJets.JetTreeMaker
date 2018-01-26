@@ -51,8 +51,8 @@ void UncorrelatedJetStudy(const Bool_t isInBatchMode=false) {
   cout << "\n  Beginning uncorrelated jet study..." << endl;
 
   // io parameters
-  const TString sOutput("pp200r9.ueStudy.eTtrg920.r03a02rm1full.d23m1y2018.root");
-  const TString sInput("pp200r9.withOaCones.eTtrg920.r03rm1full.d21m1y2018.root");
+  const TString sOutput("pp200r9.ueStudyScaledByBinWidth.eTtrg920.r03a02rm1chrg.d26m1y2018.root");
+  const TString sInput("output/CollaborationMeetingJan2018/pp200r9.withOaCones.eTtrg920.r03rm1chrg.d21m1y2018.root");
   const TString sTree("JetTree");
 
   // trigger parameters
@@ -561,11 +561,29 @@ void UncorrelatedJetStudy(const Bool_t isInBatchMode=false) {
       // pT histograms
       const Double_t pTnorm = hBin * nTrgBin[iBinEt][iBinId];
       hPtRE[iBinEt][iBinId] -> Scale(1. / pTnorm);
+      for (UInt_t iBinPt = 1; iBinPt < NBinsPt + 1; iBinPt++) {
+        const Double_t pTwidth = hPtRE[iBinEt][iBinId] -> GetBinWidth(iBinPt);
+        const Double_t pTvalue = hPtRE[iBinEt][iBinId] -> GetBinContent(iBinPt);
+        const Double_t pTscale = pTvalue / pTwidth;
+        hPtRE[iBinEt][iBinId] -> SetBinContent(iBinPt, pTscale);
+      }
       for (UInt_t iBinDf = 0; iBinDf < NBinsDf; iBinDf++) {
         hPtUE[iBinEt][iBinId][iBinDf] -> Scale(1. / pTnorm);
+        for (UInt_t iBinPt = 1; iBinPt < NBinsPt + 1; iBinPt++) {
+          const Double_t pTwidth = hPtUE[iBinEt][iBinId][iBinDf] -> GetBinWidth(iBinPt);
+          const Double_t pTvalue = hPtUE[iBinEt][iBinId][iBinDf] -> GetBinContent(iBinPt);
+          const Double_t pTscale = pTvalue / pTwidth;
+          hPtUE[iBinEt][iBinId][iBinDf] -> SetBinContent(iBinPt, pTscale);
+        }
       }
       for (UInt_t iCone = 0; iCone < NCones + 1; iCone++) {
         hPtOA[iBinEt][iBinId][iCone] -> Scale(1. / pTnorm);
+        for (UInt_t iBinPt = 1; iBinPt < NBinsPt + 1; iBinPt++) {
+          const Double_t pTwidth = hPtOA[iBinEt][iBinId][iCone] -> GetBinWidth(iBinPt);
+          const Double_t pTvalue = hPtOA[iBinEt][iBinId][iCone] -> GetBinContent(iBinPt);
+          const Double_t pTscale = pTvalue / pTwidth;
+          hPtOA[iBinEt][iBinId][iCone] -> SetBinContent(iBinPt, pTscale);
+        }
       }
 
     }  // end id loop

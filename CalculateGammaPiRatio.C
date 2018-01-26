@@ -47,8 +47,8 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   cout << "\n  Beginning gamma-pi0 ratio calculation..." << endl;
 
   // io parameters
-  const TString sOutput("pp200r9.etStudy.eTtrg920.r05a065rm1full.d24m1y2018.root");
-  const TString sInput("pp200r9.withOaCones.eTtrg920.r05rm1full.d21m1y2018.root");
+  const TString sOutput("pp200r9.etStudyScaledByBinWidth.eTtrg920.r03a02rm1chrg.d26m1y2018.root");
+  const TString sInput("output/CollaborationMeetingJan2018/pp200r9.withOaCones.eTtrg920.r03rm1chrg.d21m1y2018.root");
   const TString sTree("JetTree");
 
   // trigger parameters
@@ -57,8 +57,8 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   const Double_t gamTsp[2] = {0.2, 0.6};
 
   // jet parameters
-  const Double_t rJet(0.5);
-  const Double_t aJetMin(0.65);
+  const Double_t rJet(0.3);
+  const Double_t aJetMin(0.2);
   const Double_t pTjetMin(0.2);
   const Double_t dFrecoil(TMath::PiOver4());
 
@@ -314,6 +314,12 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
     for (UInt_t iBinId = 0; iBinId < NBinsId; iBinId++) {
       const Double_t pTnorm = hBin * nTrgBin[iBinEt][iBinId];
       hPtRE[iBinEt][iBinId] -> Scale(1. / pTnorm);
+      for (UInt_t iBinPt = 1; iBinPt < NBinsPt + 1; iBinPt++) {
+        const Double_t pTwidth = hPtRE[iBinEt][iBinId] -> GetBinWidth(iBinPt);
+        const Double_t pTvalue = hPtRE[iBinEt][iBinId] -> GetBinContent(iBinPt);
+        const Double_t pTscale = pTvalue / pTwidth;
+        hPtRE[iBinEt][iBinId] -> SetBinContent(iBinPt, pTscale);
+      }
     }
   }
   cout << "    Normalized histograms." << endl;
@@ -489,7 +495,7 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   const Float_t marginBR(0.17);
   const Float_t xPadPt[NPadsPt + 2]  = {0., 1., 0., 1.};
   const Float_t yPadPt[NPadsPt + 2]  = {0., 0.35, 0.35, 1.};
-  const Float_t xPadRt[NBinsEt + 4]  = {0., 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1.};
+  const Float_t xPadRt[NBinsEt + 4]  = {0., 0.35, 0.35, 0.65, 0.65, 1., 0.65, 1.};
   const Float_t yPadRtR[NBinsEt + 4] = {0., 0.35, 0., 0.35, 0., 0.35, 0., 0.35};
   const Float_t yPadRtJ[NBinsEt + 4] = {0.35, 1., 0.35, 1., 0.35, 1., 0.35, 1.};
   const TString sPtCanvasR[NBinsEt]  = {"cPtRatio_et920", "cPtRatio_et911", "cPtRatio_et1115", "cPtRatio_et1520"};
@@ -544,8 +550,8 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   pRtJet[1][1] = new TPad(sRtPadsJ[1].Data(), "", xPadRt[2], yPadRtJ[2], xPadRt[3], yPadRtJ[3]);
   pRtJet[2][0] = new TPad(sRtPadsR[2].Data(), "", xPadRt[4], yPadRtR[4], xPadRt[5], yPadRtR[5]);
   pRtJet[2][1] = new TPad(sRtPadsJ[2].Data(), "", xPadRt[4], yPadRtJ[4], xPadRt[5], yPadRtJ[5]);
-  pRtJet[3][0] = new TPad(sRtPadsR[3].Data(), "", xPadRt[6], yPadRtR[6], xPadRt[7], yPadRtR[7]);
-  pRtJet[3][1] = new TPad(sRtPadsJ[3].Data(), "", xPadRt[6], yPadRtJ[6], xPadRt[7], yPadRtJ[7]);
+  //pRtJet[3][0] = new TPad(sRtPadsR[3].Data(), "", xPadRt[6], yPadRtR[6], xPadRt[7], yPadRtR[7]);
+  //pRtJet[3][1] = new TPad(sRtPadsJ[3].Data(), "", xPadRt[6], yPadRtJ[6], xPadRt[7], yPadRtJ[7]);
   pRtJet[0][0] -> SetGrid(grid, grid);
   pRtJet[0][0] -> SetLogy(log);
   pRtJet[0][0] -> SetFrameBorderMode(frame);
@@ -577,31 +583,31 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   pRtJet[2][0] -> SetGrid(grid, grid);
   pRtJet[2][0] -> SetLogy(log);
   pRtJet[2][0] -> SetFrameBorderMode(frame);
-  pRtJet[2][0] -> SetRightMargin(noMargin);
+  pRtJet[2][0] -> SetRightMargin(marginR);
   pRtJet[2][0] -> SetLeftMargin(noMargin);
   pRtJet[2][0] -> SetTopMargin(noMargin);
   pRtJet[2][0] -> SetBottomMargin(marginBR);
   pRtJet[2][1] -> SetGrid(grid, grid);
   pRtJet[2][1] -> SetLogy(log);
   pRtJet[2][1] -> SetFrameBorderMode(frame);
-  pRtJet[2][1] -> SetRightMargin(noMargin);
+  pRtJet[2][1] -> SetRightMargin(marginR);
   pRtJet[2][1] -> SetLeftMargin(noMargin);
   pRtJet[2][1] -> SetTopMargin(marginT);
   pRtJet[2][1] -> SetBottomMargin(noMargin);
-  pRtJet[3][0] -> SetGrid(grid, grid);
-  pRtJet[3][0] -> SetLogy(log);
-  pRtJet[3][0] -> SetFrameBorderMode(frame);
-  pRtJet[3][0] -> SetRightMargin(marginR);
-  pRtJet[3][0] -> SetLeftMargin(noMargin);
-  pRtJet[3][0] -> SetTopMargin(noMargin);
-  pRtJet[3][0] -> SetBottomMargin(marginBR);
-  pRtJet[3][1] -> SetGrid(grid, grid);
-  pRtJet[3][1] -> SetLogy(log);
-  pRtJet[3][1] -> SetFrameBorderMode(frame);
-  pRtJet[3][1] -> SetRightMargin(marginR);
-  pRtJet[3][1] -> SetLeftMargin(noMargin);
-  pRtJet[3][1] -> SetTopMargin(marginT);
-  pRtJet[3][1] -> SetBottomMargin(noMargin);
+  //pRtJet[3][0] -> SetGrid(grid, grid);
+  //pRtJet[3][0] -> SetLogy(log);
+  //pRtJet[3][0] -> SetFrameBorderMode(frame);
+  //pRtJet[3][0] -> SetRightMargin(marginR);
+  //pRtJet[3][0] -> SetLeftMargin(noMargin);
+  //pRtJet[3][0] -> SetTopMargin(noMargin);
+  //pRtJet[3][0] -> SetBottomMargin(marginBR);
+  //pRtJet[3][1] -> SetGrid(grid, grid);
+  //pRtJet[3][1] -> SetLogy(log);
+  //pRtJet[3][1] -> SetFrameBorderMode(frame);
+  //pRtJet[3][1] -> SetRightMargin(marginR);
+  //pRtJet[3][1] -> SetLeftMargin(noMargin);
+  //pRtJet[3][1] -> SetTopMargin(marginT);
+  //pRtJet[3][1] -> SetBottomMargin(noMargin);
   cRtJet       -> cd();
   pRtJet[0][0] -> Draw();
   pRtJet[0][1] -> Draw();
@@ -609,8 +615,8 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   pRtJet[1][1] -> Draw();
   pRtJet[2][0] -> Draw();
   pRtJet[2][1] -> Draw();
-  pRtJet[3][0] -> Draw();
-  pRtJet[3][1] -> Draw();
+  //pRtJet[3][0] -> Draw();
+  //pRtJet[3][1] -> Draw();
   pRtJet[0][0] -> cd();
   hRatioRE[0]  -> Draw();
   lOne         -> Draw();
@@ -635,14 +641,14 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   hPtRE[2][0]  -> Draw("same");
   pPtTxt[2]    -> Draw();
   lPtJet       -> Draw();
-  pRtJet[3][0] -> cd();
-  hRatioRE[3]  -> Draw();
-  lOne         -> Draw();
-  pRtJet[3][1] -> cd();
-  hPtRE[3][1]  -> Draw();
-  hPtRE[3][0]  -> Draw("same");
-  pPtTxt[2]    -> Draw();
-  lPtJet       -> Draw();
+  //pRtJet[3][0] -> cd();
+  //hRatioRE[3]  -> Draw();
+  //lOne         -> Draw();
+  //pRtJet[3][1] -> cd();
+  //hPtRE[3][1]  -> Draw();
+  //hPtRE[3][0]  -> Draw("same");
+  //pPtTxt[2]    -> Draw();
+  //lPtJet       -> Draw();
   cRtJet       -> Write();
   cRtJet       -> Close();
   cout << "    Drew plots." << endl;
