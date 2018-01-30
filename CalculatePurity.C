@@ -38,7 +38,7 @@ static const UInt_t NTrgs(2);
 
 
 
-void CalculatePurity(const Bool_t isInBatchMode=false) {
+void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
 
   // lower verbosity
   gErrorIgnoreLevel = kError;
@@ -520,8 +520,8 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   const Double_t eTtrgMin[NBins] = {9., 9., 11., 13., 15., 17.};
   const Double_t eTtrgMax[NBins] = {20., 11., 13., 15., 17., 20.};
   const Double_t eTtrgBin[NBins] = {9., 11., 13., 15., 17., 20.};
-  const Double_t tspMin[NTrgs]   = {0., 0.2};
-  const Double_t tspMax[NTrgs]   = {0.08, 0.6};
+  const Double_t tspMin[NTrgs]   = {0., 0.};
+  const Double_t tspMax[NTrgs]   = {0.08, 100.};
 
   cout << "    Trigger bins:" << endl;
   for (UInt_t iBin = 0; iBin < NBins; iBin++) {
@@ -720,7 +720,6 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
 
     // determine bin
     UInt_t eTbin = 0;
-    UInt_t idBin = 0;
     for (UInt_t iBin = 1; iBin < NBins; iBin++) {
       const Bool_t isInBin = ((eTtrg >= eTtrgMin[iBin]) && (eTtrg < eTtrgMax[iBin]));
       if (isInBin) {
@@ -729,12 +728,10 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
       }
     }
     if (isInPi0cut) {
-      idBin = 0;
       nTrgBin[0][0]++;
       nTrgBin[eTbin][0]++;
     }
     if (isInGamCut) {
-      idBin = 1;
       nTrgBin[0][1]++;
       nTrgBin[eTbin][1]++;
     }
@@ -767,25 +764,47 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
 
 
       // fill histograms
-      hEtaTrk[0][idBin]     -> Fill(hTrk);
-      hPtTrk[0][idBin]      -> Fill(pTtrk);
-      hZtTrk[0][idBin]      -> Fill(zTtrk);
-      hEtaTrk[eTbin][idBin] -> Fill(hTrk);
-      hPtTrk[eTbin][idBin]  -> Fill(pTtrk);
-      hZtTrk[eTbin][idBin]  -> Fill(zTtrk);
+      if (isInPi0cut) {
+        hEtaTrk[0][0]     -> Fill(hTrk);
+        hPtTrk[0][0]      -> Fill(pTtrk);
+        hZtTrk[0][0]      -> Fill(zTtrk);
+        hEtaTrk[eTbin][0] -> Fill(hTrk);
+        hPtTrk[eTbin][0]  -> Fill(pTtrk);
+        hZtTrk[eTbin][0]  -> Fill(zTtrk);
+      }
+      if (isInGamCut) {
+        hEtaTrk[0][1]     -> Fill(hTrk);
+        hPtTrk[0][1]      -> Fill(pTtrk);
+        hZtTrk[0][1]      -> Fill(zTtrk);
+        hEtaTrk[eTbin][1] -> Fill(hTrk);
+        hPtTrk[eTbin][1]  -> Fill(pTtrk);
+        hZtTrk[eTbin][1]  -> Fill(zTtrk);
+      }
 
       const Bool_t isInZtCut  = ((zTtrk > zTtrkMin) && (zTtrk < zTtrkMax));
       const Bool_t isNearSide = (TMath::Abs(dFtrk - dFnear) < dFsize);
       if (isInZtCut) {
-        hDeltaPhi[0][idBin]     -> Fill(dFtrk);
-        hZtCalc[0][idBin]       -> Fill(zTtrk);
-        hDeltaPhi[eTbin][idBin] -> Fill(dFtrk);
-        hZtCalc[eTbin][idBin]   -> Fill(zTtrk);
-        if (isNearSide) {
-          hDeltaPhiNS[0][idBin]     -> Fill(dFtrk);
-          hDeltaPhiNS[eTbin][idBin] -> Fill(dFtrk);
-        }
-      }
+        if (isInPi0cut) {
+          hDeltaPhi[0][0]     -> Fill(dFtrk);
+          hZtCalc[0][0]       -> Fill(zTtrk);
+          hDeltaPhi[eTbin][0] -> Fill(dFtrk);
+          hZtCalc[eTbin][0]   -> Fill(zTtrk);
+          if (isNearSide) {
+            hDeltaPhiNS[0][0]     -> Fill(dFtrk);
+            hDeltaPhiNS[eTbin][0] -> Fill(dFtrk);
+          }  // end NS cut
+        }  // end pi0 cut
+        if (isInGamCut) {
+          hDeltaPhi[0][1]     -> Fill(dFtrk);
+          hZtCalc[0][1]       -> Fill(zTtrk);
+          hDeltaPhi[eTbin][1] -> Fill(dFtrk);
+          hZtCalc[eTbin][1]   -> Fill(zTtrk);
+          if (isNearSide) {
+            hDeltaPhiNS[0][1]     -> Fill(dFtrk);
+            hDeltaPhiNS[eTbin][1] -> Fill(dFtrk);
+          }  // end NS cut
+        }  // end pi0 cut
+      }  // end zT cut
 
     }  // end track loop
 
