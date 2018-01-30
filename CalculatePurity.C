@@ -18,6 +18,7 @@
 #include "TMath.h"
 #include "TLine.h"
 #include "TString.h"
+#include "TLegend.h"
 #include "TCanvas.h"
 #include "TPaveText.h"
 #include "TDirectory.h"
@@ -31,7 +32,7 @@ static const UInt_t NTwrMax(5000);
 static const UInt_t NMatchMax(10);
 static const UInt_t NHotTwr(302);
 static const UInt_t NBadRuns(45);
-static const UInt_t NBins(4);
+static const UInt_t NBins(6);
 static const UInt_t NHist(NBins - 1);
 static const UInt_t NTrgs(2);
 
@@ -45,7 +46,7 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
 
 
   // io parameters
-  const TString sOutput("pp200r9.purityTest.d20m1y2018.root");
+  const TString sOutput("pp200r9.purityInclusiveGamma.d30m1y2018.root");
   const TString sInput("input/pp200r9.merge.root");
 
   // event parameters
@@ -63,8 +64,10 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   const Double_t rFitMin(0.52);
   const Double_t dcaMax(1.);
   const Double_t hTrkMax(1.);
-  const Double_t pTtrkMin(1.);
+  const Double_t pTtrkMin(0.2);
   const Double_t pTtrkMax(20.);
+  const Double_t zTtrkMin(0.3);
+  const Double_t zTtrkMax(0.6);
 
   // calculation parameters
   const Double_t dFnear(0.);
@@ -514,9 +517,9 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
 
 
   // define trigger bins
-  const Double_t eTtrgMin[NBins] = {9., 9., 11., 15.};
-  const Double_t eTtrgMax[NBins] = {20., 11., 15., 20.};
-  const Double_t eTtrgBin[NBins] = {9., 11., 15., 20.};
+  const Double_t eTtrgMin[NBins] = {9., 9., 11., 13., 15., 17.};
+  const Double_t eTtrgMax[NBins] = {20., 11., 13., 15., 17., 20.};
+  const Double_t eTtrgBin[NBins] = {9., 11., 13., 15., 17., 20.};
   const Double_t tspMin[NTrgs]   = {0., 0.2};
   const Double_t tspMax[NTrgs]   = {0.08, 0.6};
 
@@ -532,11 +535,12 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   TH1D *hEtaTrk[NBins][NTrgs];
   TH1D *hPtTrk[NBins][NTrgs];
   TH1D *hZtTrk[NBins][NTrgs];
+  TH1D *hZtCalc[NBins][NTrgs];
 
   const UInt_t   nDf   = 60;
   const UInt_t   nH    = 40;
   const UInt_t   nPt   = 40;
-  const UInt_t   nZt   = 20;
+  const UInt_t   nZt   = 10;
   const Double_t dF[2] = {-1.57, 4.71};
   const Double_t h[2]  = {-1., 1.};
   const Double_t pT[2] = {0., 40.};
@@ -545,42 +549,74 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   hDeltaPhi[0][1]   = new TH1D("hDeltaPhi_ga920", "", nDf, dF[0], dF[1]);
   hDeltaPhi[1][0]   = new TH1D("hDeltaPhi_pi911", "", nDf, dF[0], dF[1]);
   hDeltaPhi[1][1]   = new TH1D("hDeltaPhi_ga911", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[2][0]   = new TH1D("hDeltaPhi_pi1115", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[2][1]   = new TH1D("hDeltaPhi_ga1115", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[3][0]   = new TH1D("hDeltaPhi_pi1520", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[3][1]   = new TH1D("hDeltaPhi_ga1520", "", nDf, dF[0], dF[1]);
+  hDeltaPhi[2][0]   = new TH1D("hDeltaPhi_pi1113", "", nDf, dF[0], dF[1]);
+  hDeltaPhi[2][1]   = new TH1D("hDeltaPhi_ga1113", "", nDf, dF[0], dF[1]);
+  hDeltaPhi[3][0]   = new TH1D("hDeltaPhi_pi1315", "", nDf, dF[0], dF[1]);
+  hDeltaPhi[3][1]   = new TH1D("hDeltaPhi_ga1315", "", nDf, dF[0], dF[1]);
+  hDeltaPhi[4][0]   = new TH1D("hDeltaPhi_pi1517", "", nDf, dF[0], dF[1]);
+  hDeltaPhi[4][1]   = new TH1D("hDeltaPhi_ga1517", "", nDf, dF[0], dF[1]);
+  hDeltaPhi[5][0]   = new TH1D("hDeltaPhi_pi1720", "", nDf, dF[0], dF[1]);
+  hDeltaPhi[5][1]   = new TH1D("hDeltaPhi_ga1720", "", nDf, dF[0], dF[1]);
   hDeltaPhiNS[0][0] = new TH1D("hDeltaPhiNS_pi920", "", nDf, dF[0], dF[1]);
   hDeltaPhiNS[0][1] = new TH1D("hDeltaPhiNS_ga920", "", nDf, dF[0], dF[1]);
   hDeltaPhiNS[1][0] = new TH1D("hDeltaPhiNS_pi911", "", nDf, dF[0], dF[1]);
   hDeltaPhiNS[1][1] = new TH1D("hDeltaPhiNS_ga911", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[2][0] = new TH1D("hDeltaPhiNS_pi1115", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[2][1] = new TH1D("hDeltaPhiNS_ga1115", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[3][0] = new TH1D("hDeltaPhiNS_pi1520", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[3][1] = new TH1D("hDeltaPhiNS_ga1520", "", nDf, dF[0], dF[1]);
+  hDeltaPhiNS[2][0] = new TH1D("hDeltaPhiNS_pi1113", "", nDf, dF[0], dF[1]);
+  hDeltaPhiNS[2][1] = new TH1D("hDeltaPhiNS_ga1113", "", nDf, dF[0], dF[1]);
+  hDeltaPhiNS[3][0] = new TH1D("hDeltaPhiNS_pi1315", "", nDf, dF[0], dF[1]);
+  hDeltaPhiNS[3][1] = new TH1D("hDeltaPhiNS_ga1315", "", nDf, dF[0], dF[1]);
+  hDeltaPhiNS[4][0] = new TH1D("hDeltaPhiNS_pi1517", "", nDf, dF[0], dF[1]);
+  hDeltaPhiNS[4][1] = new TH1D("hDeltaPhiNS_ga1517", "", nDf, dF[0], dF[1]);
+  hDeltaPhiNS[5][0] = new TH1D("hDeltaPhiNS_pi1720", "", nDf, dF[0], dF[1]);
+  hDeltaPhiNS[5][1] = new TH1D("hDeltaPhiNS_ga1720", "", nDf, dF[0], dF[1]);
   hEtaTrk[0][0]     = new TH1D("hEtaTrk_pi920", "", nH, h[0], h[1]);
   hEtaTrk[0][1]     = new TH1D("hEtaTrk_ga920", "", nH, h[0], h[1]);
   hEtaTrk[1][0]     = new TH1D("hEtaTrk_pi911", "", nH, h[0], h[1]);
   hEtaTrk[1][1]     = new TH1D("hEtaTrk_ga911", "", nH, h[0], h[1]);
-  hEtaTrk[2][0]     = new TH1D("hEtaTrk_pi1115", "", nH, h[0], h[1]);
-  hEtaTrk[2][1]     = new TH1D("hEtaTrk_ga1115", "", nH, h[0], h[1]);
-  hEtaTrk[3][0]     = new TH1D("hEtaTrk_pi1520", "", nH, h[0], h[1]);
-  hEtaTrk[3][1]     = new TH1D("hEtaTrk_ga1520", "", nH, h[0], h[1]);
+  hEtaTrk[2][0]     = new TH1D("hEtaTrk_pi1113", "", nH, h[0], h[1]);
+  hEtaTrk[2][1]     = new TH1D("hEtaTrk_ga1113", "", nH, h[0], h[1]);
+  hEtaTrk[3][0]     = new TH1D("hEtaTrk_pi1315", "", nH, h[0], h[1]);
+  hEtaTrk[3][1]     = new TH1D("hEtaTrk_ga1315", "", nH, h[0], h[1]);
+  hEtaTrk[4][0]     = new TH1D("hEtaTrk_pi1517", "", nH, h[0], h[1]);
+  hEtaTrk[4][1]     = new TH1D("hEtaTrk_ga1517", "", nH, h[0], h[1]);
+  hEtaTrk[5][0]     = new TH1D("hEtaTrk_pi1720", "", nH, h[0], h[1]);
+  hEtaTrk[5][1]     = new TH1D("hEtaTrk_ga1720", "", nH, h[0], h[1]);
   hPtTrk[0][0]      = new TH1D("hPtTrk_pi920", "", nPt, pT[0], pT[1]);
   hPtTrk[0][1]      = new TH1D("hPtTrk_ga920", "", nPt, pT[0], pT[1]);
   hPtTrk[1][0]      = new TH1D("hPtTrk_pi911", "", nPt, pT[0], pT[1]);
   hPtTrk[1][1]      = new TH1D("hPtTrk_ga911", "", nPt, pT[0], pT[1]);
-  hPtTrk[2][0]      = new TH1D("hPtTrk_pi1115", "", nPt, pT[0], pT[1]);
-  hPtTrk[2][1]      = new TH1D("hPtTrk_ga1115", "", nPt, pT[0], pT[1]);
-  hPtTrk[3][0]      = new TH1D("hPtTrk_pi1520", "", nPt, pT[0], pT[1]);
-  hPtTrk[3][1]      = new TH1D("hPtTrk_ga1520", "", nPt, pT[0], pT[1]);
+  hPtTrk[2][0]      = new TH1D("hPtTrk_pi1113", "", nPt, pT[0], pT[1]);
+  hPtTrk[2][1]      = new TH1D("hPtTrk_ga1113", "", nPt, pT[0], pT[1]);
+  hPtTrk[3][0]      = new TH1D("hPtTrk_pi1315", "", nPt, pT[0], pT[1]);
+  hPtTrk[3][1]      = new TH1D("hPtTrk_ga1315", "", nPt, pT[0], pT[1]);
+  hPtTrk[4][0]      = new TH1D("hPtTrk_pi1517", "", nPt, pT[0], pT[1]);
+  hPtTrk[4][1]      = new TH1D("hPtTrk_ga1517", "", nPt, pT[0], pT[1]);
+  hPtTrk[5][0]      = new TH1D("hPtTrk_pi1720", "", nPt, pT[0], pT[1]);
+  hPtTrk[5][1]      = new TH1D("hPtTrk_ga1720", "", nPt, pT[0], pT[1]);
   hZtTrk[0][0]      = new TH1D("hZtTrk_pi920", "", nZt, zT[0], zT[1]);
   hZtTrk[0][1]      = new TH1D("hZtTrk_ga920", "", nZt, zT[0], zT[1]);
   hZtTrk[1][0]      = new TH1D("hZtTrk_pi911", "", nZt, zT[0], zT[1]);
   hZtTrk[1][1]      = new TH1D("hZtTrk_ga911", "", nZt, zT[0], zT[1]);
-  hZtTrk[2][0]      = new TH1D("hZtTrk_pi1115", "", nZt, zT[0], zT[1]);
-  hZtTrk[2][1]      = new TH1D("hZtTrk_ga1115", "", nZt, zT[0], zT[1]);
-  hZtTrk[3][0]      = new TH1D("hZtTrk_pi1520", "", nZt, zT[0], zT[1]);
-  hZtTrk[3][1]      = new TH1D("hZtTrk_ga1520", "", nZt, zT[0], zT[1]);
+  hZtTrk[2][0]      = new TH1D("hZtTrk_pi1113", "", nZt, zT[0], zT[1]);
+  hZtTrk[2][1]      = new TH1D("hZtTrk_ga1113", "", nZt, zT[0], zT[1]);
+  hZtTrk[3][0]      = new TH1D("hZtTrk_pi1315", "", nZt, zT[0], zT[1]);
+  hZtTrk[3][1]      = new TH1D("hZtTrk_ga1315", "", nZt, zT[0], zT[1]);
+  hZtTrk[4][0]      = new TH1D("hZtTrk_pi1517", "", nZt, zT[0], zT[1]);
+  hZtTrk[4][1]      = new TH1D("hZtTrk_ga1517", "", nZt, zT[0], zT[1]);
+  hZtTrk[5][0]      = new TH1D("hZtTrk_pi1720", "", nZt, zT[0], zT[1]);
+  hZtTrk[5][1]      = new TH1D("hZtTrk_ga1720", "", nZt, zT[0], zT[1]);
+  hZtCalc[0][0]     = new TH1D("hZtCalc_pi920", "", nZt, zT[0], zT[1]);
+  hZtCalc[0][1]     = new TH1D("hZtCalc_ga920", "", nZt, zT[0], zT[1]);
+  hZtCalc[1][0]     = new TH1D("hZtCalc_pi911", "", nZt, zT[0], zT[1]);
+  hZtCalc[1][1]     = new TH1D("hZtCalc_ga911", "", nZt, zT[0], zT[1]);
+  hZtCalc[2][0]     = new TH1D("hZtCalc_pi1113", "", nZt, zT[0], zT[1]);
+  hZtCalc[2][1]     = new TH1D("hZtCalc_ga1113", "", nZt, zT[0], zT[1]);
+  hZtCalc[3][0]     = new TH1D("hZtCalc_pi1315", "", nZt, zT[0], zT[1]);
+  hZtCalc[3][1]     = new TH1D("hZtCalc_ga1315", "", nZt, zT[0], zT[1]);
+  hZtCalc[4][0]     = new TH1D("hZtCalc_pi1517", "", nZt, zT[0], zT[1]);
+  hZtCalc[4][1]     = new TH1D("hZtCalc_ga1517", "", nZt, zT[0], zT[1]);
+  hZtCalc[5][0]     = new TH1D("hZtCalc_pi1720", "", nZt, zT[0], zT[1]);
+  hZtCalc[5][1]     = new TH1D("hZtCalc_ga1720", "", nZt, zT[0], zT[1]);
   for (UInt_t iBin = 0; iBin < NBins; iBin++) {
     for (UInt_t iTrg = 0; iTrg < NTrgs; iTrg++) {
       hDeltaPhi[iBin][iTrg]   -> Sumw2();
@@ -588,6 +624,7 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
       hEtaTrk[iBin][iTrg]     -> Sumw2();
       hPtTrk[iBin][iTrg]      -> Sumw2();
       hZtTrk[iBin][iTrg]      -> Sumw2();
+      hZtCalc[iBin][iTrg]     -> Sumw2();
     }
   }
 
@@ -730,20 +767,24 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
 
 
       // fill histograms
-      hDeltaPhi[0][idBin] -> Fill(dFtrk);
-      hEtaTrk[0][idBin]   -> Fill(hTrk);
-      hPtTrk[0][idBin]    -> Fill(pTtrk);
-      hZtTrk[0][idBin]    -> Fill(zTtrk);
+      hEtaTrk[0][idBin]     -> Fill(hTrk);
+      hPtTrk[0][idBin]      -> Fill(pTtrk);
+      hZtTrk[0][idBin]      -> Fill(zTtrk);
+      hEtaTrk[eTbin][idBin] -> Fill(hTrk);
+      hPtTrk[eTbin][idBin]  -> Fill(pTtrk);
+      hZtTrk[eTbin][idBin]  -> Fill(zTtrk);
 
-      hDeltaPhi[eTbin][idBin] -> Fill(dFtrk);
-      hEtaTrk[eTbin][idBin]   -> Fill(hTrk);
-      hPtTrk[eTbin][idBin]    -> Fill(pTtrk);
-      hZtTrk[eTbin][idBin]    -> Fill(zTtrk);
-
+      const Bool_t isInZtCut  = ((zTtrk > zTtrkMin) && (zTtrk < zTtrkMax));
       const Bool_t isNearSide = (TMath::Abs(dFtrk - dFnear) < dFsize);
-      if (isNearSide) {
-        hDeltaPhiNS[0][idBin]     -> Fill(dFtrk);
-        hDeltaPhiNS[eTbin][idBin] -> Fill(dFtrk);
+      if (isInZtCut) {
+        hDeltaPhi[0][idBin]     -> Fill(dFtrk);
+        hZtCalc[0][idBin]       -> Fill(zTtrk);
+        hDeltaPhi[eTbin][idBin] -> Fill(dFtrk);
+        hZtCalc[eTbin][idBin]   -> Fill(zTtrk);
+        if (isNearSide) {
+          hDeltaPhiNS[0][idBin]     -> Fill(dFtrk);
+          hDeltaPhiNS[eTbin][idBin] -> Fill(dFtrk);
+        }
       }
 
     }  // end track loop
@@ -772,6 +813,7 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
        hEtaTrk[iBin][iTrg]     -> Scale(1. / hNorm);
        hPtTrk[iBin][iTrg]      -> Scale(1. / pTnorm);
        hZtTrk[iBin][iTrg]      -> Scale(1. / zTnorm);
+       hZtCalc[iBin][iTrg]     -> Scale(1. / zTnorm);
      }
    }
    cout << "    Normalized histograms." << endl;
@@ -900,8 +942,10 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
 
   // make R histogram
   const UInt_t fColR(879);
-  const UInt_t fStyR(10);
-  const UInt_t fSizR(4);
+  const UInt_t fStyRV(10);
+  const UInt_t fStyRE(1);
+  const UInt_t fSizRV(1);
+  const UInt_t fSizRE(2);
 
   TH1D *hPurity = new TH1D("hPurity", "", NHist, eTtrgBin);
   hPurity -> Sumw2();
@@ -911,9 +955,17 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   }
 
   TLine *lAverage = new TLine(eTtrgBin[0], valueR[0], eTtrgBin[NHist], valueR[0]);
+  TLine *lAvgUp   = new TLine(eTtrgBin[0], valueR[0] + errorR[0], eTtrgBin[NHist], valueR[0] + errorR[0]);
+  TLine *lAvgDown = new TLine(eTtrgBin[0], valueR[0] - errorR[0], eTtrgBin[NHist], valueR[0] - errorR[0]);
   lAverage -> SetLineColor(fColR);
-  lAverage -> SetLineStyle(fStyR);
-  lAverage -> SetLineWidth(fSizR);
+  lAverage -> SetLineStyle(fStyRV);
+  lAverage -> SetLineWidth(fSizRV);
+  lAvgUp   -> SetLineColor(fColR);
+  lAvgUp   -> SetLineStyle(fStyRE);
+  lAvgUp   -> SetLineWidth(fSizRE);
+  lAvgDown -> SetLineColor(fColR);
+  lAvgDown -> SetLineStyle(fStyRE);
+  lAvgDown -> SetLineWidth(fSizRE);
   cout << "    Made R histogram..." << endl;
 
 
@@ -924,13 +976,29 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   const UInt_t  fFilNS(3345);
   const UInt_t  fLinNS(2);
   const UInt_t  fMarNS(1);
-  const UInt_t  fCol[NTrgs] = {859, 899};
+  const UInt_t  fCol[NTrgs]  = {859, 899};
+  const UInt_t  fMarZ[NTrgs] = {27, 24};
   const Float_t fLab(0.03);
   const TString sTitleX("#Delta#varphi^{trk} = #varphi^{trk} - #varphi^{trg}");
   const TString sTitleY("D^{NS}_{pp}");
   const TString sTitleXR("E_{T}^{trg} [GeV]");
   const TString sTitleYR("R = D^{NS}_{pp}(#gamma^{rich}) / D^{NS}_{pp}(#pi^{0})");
-  const TString sTitle[NTrgs] = {"#pi^{0} trigger", "#gamma^{rich} trigger"};
+  const TString sTitleYZ("(1/N^{trg}) dN^{trk}/dz_{T}^{trk}");
+  const TString sTitleXZ[NTrgs] = {"z_{T}^{trk}(#pi^{0})", "z_{T}^{trk}(#gamma^{rich})"};
+  const TString sTitle[NTrgs]   = {"#pi^{0} trigger", "#gamma^{rich} trigger"};
+
+  // create zT x-axis title
+  TString sXaxis("#color[");
+  for (UInt_t iTrg = 0; iTrg < NTrgs; iTrg++) {
+    sXaxis += fCol[iTrg];
+    sXaxis += "]{";
+    sXaxis += sTitleXZ[iTrg].Data();
+    if (iTrg + 1 == NTrgs)
+      sXaxis += "}";
+    else
+      sXaxis += "}, #color[";
+  }
+
   for (UInt_t iBin = 0; iBin < NBins; iBin++) {
     for (UInt_t iTrg = 0; iTrg < NTrgs; iTrg++) {
 
@@ -965,20 +1033,33 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
       hDeltaPhiNS[iBin][iTrg] -> GetYaxis() -> CenterTitle(fCnt);
       hDeltaPhiNS[iBin][iTrg] -> GetYaxis() -> SetLabelSize(fLab);
 
-      // R histogram
-      hPurity -> SetMarkerStyle(fMar);
-      hPurity -> GetXaxis() -> SetTitle(sTitleXR.Data());
-      hPurity -> GetXaxis() -> SetTitleFont(fTxt);
-      hPurity -> GetXaxis() -> CenterTitle(fCnt);
-      hPurity -> GetXaxis() -> SetLabelSize(fLab);
-      hPurity -> GetYaxis() -> SetTitle(sTitleYR.Data());
-      hPurity -> GetYaxis() -> SetTitleFont(fTxt);
-      hPurity -> GetYaxis() -> CenterTitle(fCnt);
-      hPurity -> GetYaxis() -> SetLabelSize(fLab);
-      hPurity -> GetYaxis() -> SetRangeUser(0., 1.);
+      // zT histograms
+      hZtTrk[iBin][iTrg] -> SetLineColor(fCol[iTrg]);
+      hZtTrk[iBin][iTrg] -> SetMarkerStyle(fMarZ[iTrg]);
+      hZtTrk[iBin][iTrg] -> SetMarkerColor(fCol[iTrg]);
+      hZtTrk[iBin][iTrg] -> GetXaxis() -> SetTitle(sXaxis.Data());
+      hZtTrk[iBin][iTrg] -> GetXaxis() -> SetTitleFont(fTxt);
+      hZtTrk[iBin][iTrg] -> GetXaxis() -> CenterTitle(fCnt);
+      hZtTrk[iBin][iTrg] -> GetXaxis() -> SetLabelSize(fLab);
+      hZtTrk[iBin][iTrg] -> GetYaxis() -> SetTitle(sTitleYZ.Data());
+      hZtTrk[iBin][iTrg] -> GetYaxis() -> SetTitleFont(fTxt);
+      hZtTrk[iBin][iTrg] -> GetYaxis() -> CenterTitle(fCnt);
+      hZtTrk[iBin][iTrg] -> GetYaxis() -> SetLabelSize(fLab);
 
     }
   }
+
+  // R histogram
+  hPurity -> SetMarkerStyle(fMar);
+  hPurity -> GetXaxis() -> SetTitle(sTitleXR.Data());
+  hPurity -> GetXaxis() -> SetTitleFont(fTxt);
+  hPurity -> GetXaxis() -> CenterTitle(fCnt);
+  hPurity -> GetXaxis() -> SetLabelSize(fLab);
+  hPurity -> GetYaxis() -> SetTitle(sTitleYR.Data());
+  hPurity -> GetYaxis() -> SetTitleFont(fTxt);
+  hPurity -> GetYaxis() -> CenterTitle(fCnt);
+  hPurity -> GetYaxis() -> SetLabelSize(fLab);
+  hPurity -> GetYaxis() -> SetRangeUser(0., 1.);
   cout << "    Set styles." << endl;
 
 
@@ -990,17 +1071,50 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   const Float_t xyLabel[4] = {0.1, 0.1, 0.3, 0.3};
   const TString sSystem("pp-collisions, #sqrt{s} = 200 GeV");
 
-  TPaveText *pInfo[NBins][NTrgs];
+  TPaveText *pInfoZt[NBins];
+  TPaveText *pInfoDf[NBins][NTrgs];
   for (UInt_t iBin = 0; iBin < NBins; iBin++) {
+
+    // zT labels
+    pInfoZt[iBin] = new TPaveText(xyLabel[0], xyLabel[1], xyLabel[2], xyLabel[3], "NDC NB");
+    pInfoZt[iBin] -> SetFillColor(fColP);
+    pInfoZt[iBin] -> SetFillStyle(fStyP);
+    pInfoZt[iBin] -> SetLineColor(fColP);
+    pInfoZt[iBin] -> SetLineStyle(fStyP);
+    pInfoZt[iBin] -> SetTextFont(fTxt);
+    pInfoZt[iBin] -> SetTextAlign(fAlign);
+
+    // create system and kinematic info
+    TString sEtTrg("E_{T}^{trg} #in (");
+    TString sZtTrk("z_{T}^{trk} #in (");
+    TString sKinetic("");
+    sEtTrg   += eTtrgMin[iBin];
+    sEtTrg   += ", ";
+    sEtTrg   += eTtrgMax[iBin];
+    sEtTrg   += ")";
+    sZtTrk   += zTtrkMin;
+    sZtTrk   += ", ";
+    sZtTrk   += zTtrkMax;
+    sZtTrk   += ")";
+    sKinetic += sEtTrg.Data();
+    sKinetic += " #otimes ";
+    sKinetic += sZtTrk.Data();
+
+    // add text
+    pInfoZt[iBin] -> AddText(sSystem.Data());
+    pInfoZt[iBin] -> AddText(sKinetic.Data());
+
+    // delta-phi plots
     for (UInt_t iTrg = 0; iTrg < NTrgs; iTrg++) {
-      pInfo[iBin][iTrg] = new TPaveText(xyLabel[0], xyLabel[1], xyLabel[2], xyLabel[3], "NDC NB");
-      pInfo[iBin][iTrg] -> SetFillColor(fColP);
-      pInfo[iBin][iTrg] -> SetFillStyle(fStyP);
-      pInfo[iBin][iTrg] -> SetLineColor(fColP);
-      pInfo[iBin][iTrg] -> SetLineStyle(fStyP);
-      pInfo[iBin][iTrg] -> SetTextFont(fTxt);
-      pInfo[iBin][iTrg] -> SetTextColor(fCol[iTrg]);
-      pInfo[iBin][iTrg] -> SetTextAlign(fAlign);
+
+      pInfoDf[iBin][iTrg] = new TPaveText(xyLabel[0], xyLabel[1], xyLabel[2], xyLabel[3], "NDC NB");
+      pInfoDf[iBin][iTrg] -> SetFillColor(fColP);
+      pInfoDf[iBin][iTrg] -> SetFillStyle(fStyP);
+      pInfoDf[iBin][iTrg] -> SetLineColor(fColP);
+      pInfoDf[iBin][iTrg] -> SetLineStyle(fStyP);
+      pInfoDf[iBin][iTrg] -> SetTextFont(fTxt);
+      pInfoDf[iBin][iTrg] -> SetTextColor(fCol[iTrg]);
+      pInfoDf[iBin][iTrg] -> SetTextAlign(fAlign);
 
       // convert into strings
       TString sPedRaw("");
@@ -1018,28 +1132,20 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
       sPedTxt.Append(sPedRaw, nPedTxt);
       sYieldTxt.Append(sYieldRaw, nYieldTxt);
 
-      // create text
-      TString sEtTrg("E_{T}^{trg} #in (");
-      TString sPtTrk("p_{T}^{trk} #in (");
       TString sPed("ped. = ");
       TString sYield("yield = ");
-      sEtTrg += eTtrgMin[iBin];
-      sEtTrg += ", ";
-      sEtTrg += eTtrgMax[iBin];
-      sEtTrg += ")";
-      sPtTrk += pTtrkMin;
-      sPtTrk += ", ";
-      sPtTrk += pTtrkMax;
-      sPtTrk += ")";
-      sPed   += sPedTxt;
-      sYield += sYieldTxt;
+      TString sNumbers;
+      sPed     += sPedTxt;
+      sYield   += sYieldTxt;
+      sNumbers += sPedTxt.Data();
+      sNumbers += ", ";
+      sNumbers += sYieldTxt.Data();
 
       // add text
-      pInfo[iBin][iTrg] -> AddText(sSystem.Data());
-      pInfo[iBin][iTrg] -> AddText(sEtTrg.Data());
-      pInfo[iBin][iTrg] -> AddText(sPtTrk.Data());
-      pInfo[iBin][iTrg] -> AddText(sPed.Data());
-      pInfo[iBin][iTrg] -> AddText(sYield.Data());
+      pInfoDf[iBin][iTrg] -> AddText(sSystem.Data());
+      pInfoDf[iBin][iTrg] -> AddText(sKinetic.Data());
+      pInfoDf[iBin][iTrg] -> AddText(sNumbers.Data());
+
     }
   }
 
@@ -1048,16 +1154,28 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   sEtAvg += eTtrgMin[0];
   sEtAvg += ", ";
   sEtAvg += eTtrgMax[0];
+  sEtAvg += ") #otimes z_{T}^{trk} #in (";
+  sEtAvg += zTtrkMin;
+  sEtAvg += ", ";
+  sEtAvg += zTtrkMax;
   sEtAvg += ")";
 
   TString sRraw("");
+  TString sEraw("");
   TString sRtxt("");
+  TString sEtxt("");
   sRraw += valueR[0];
+  sEraw += errorR[0];
   sRtxt += "#LTR#GT = ";
+  sEtxt += " #pm ";
 
-  const UInt_t nRraw = sRtxt.First(".");
+  const UInt_t nRraw = sRraw.First(".");
+  const UInt_t nEraw = sEraw.First(".");
   const UInt_t nRtxt = (nRraw + nDec) + 1;
+  const UInt_t nEtxt = (nEraw + nDec) + 1;
   sRtxt.Append(sRraw, nRtxt);
+  sEtxt.Append(sEraw, nEtxt);
+  sRtxt.Append(sEtxt);
 
   TPaveText *pPurity = new TPaveText(xyLabel[0], xyLabel[1], xyLabel[2], xyLabel[3], "NDC NB");
   pPurity -> SetFillColor(fColP);
@@ -1074,57 +1192,22 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   cout << "    Made labels." << endl;
 
 
-  // draw plots
-  const UInt_t  widthR(750);
-  const UInt_t  heightR(750);
-  const UInt_t  widthDf(1500);
-  const UInt_t  heightDf(750);
-  const UInt_t  grid(0);
-  const Float_t margin(0.);
-  const Float_t xPadDf[NTrgs]     = {0.5, 1.};
-  const TString sRcanvas("cPurity");
-  const TString sDfCanvas[NBins] = {"cDeltaPhi_et920", "cDeltaPhi_et911", "cDeltaPhi_et1115", "cDeltaPhi_et1520"};
-  const TString sDfPads[NTrgs]   = {"pPi0", "pGamma"};
+  // make legend
+  const Float_t xyLeg[4] = {0.3, 0.1, 0.5, 0.3};
 
-  TPad    *pDeltaPhi[NBins][NTrgs];
-  TCanvas *cDeltaPhi[NBins];
-  fOutput -> cd();
-  for (UInt_t iBin = 0; iBin < NBins; iBin++) {
-    cDeltaPhi[iBin]    = new TCanvas(sDfCanvas[iBin].Data(), "", widthDf, heightDf);
-    pDeltaPhi[iBin][0] = new TPad(sDfPads[0].Data(), "", 0., 0., xPadDf[0], 1.);
-    pDeltaPhi[iBin][1] = new TPad(sDfPads[1].Data(), "", xPadDf[0], 0., xPadDf[1], 1.);
-    pDeltaPhi[iBin][0]   -> SetGrid(grid, grid);
-    pDeltaPhi[iBin][0]   -> SetRightMargin(margin);
-    pDeltaPhi[iBin][1]   -> SetGrid(grid, grid);
-    pDeltaPhi[iBin][1]   -> SetLeftMargin(margin);
-    cDeltaPhi[iBin]      -> cd();
-    pDeltaPhi[iBin][0]   -> Draw();
-    pDeltaPhi[iBin][1]   -> Draw();
-    pDeltaPhi[iBin][0]   -> cd();
-    hDeltaPhi[iBin][0]   -> Draw();
-    hDeltaPhiNS[iBin][0] -> Draw("SAME LF HIST");
-    pInfo[iBin][0]       -> Draw();
-    pDeltaPhi[iBin][1]   -> cd();
-    hDeltaPhi[iBin][1]   -> Draw();
-    hDeltaPhiNS[iBin][1] -> Draw("SAME LF HIST");
-    pInfo[iBin][1]       -> Draw();
-    cDeltaPhi[iBin]      -> Write();
-    cDeltaPhi[iBin]      -> Close();
-  }
-
-  TCanvas *cPurity = new TCanvas(sRcanvas.Data(), "", widthR, heightR);
-  cPurity  -> SetGrid(grid, grid);
-  cPurity  -> cd();
-  hPurity  -> Draw();
-  lAverage -> Draw();
-  pPurity  -> Draw();
-  cPurity  -> Write();
-  cPurity  -> Close();
-  cout << "    Drew plots." << endl;
+  TLegend *lZtTrk = new TLegend(xyLeg[0], xyLeg[1], xyLeg[2], xyLeg[3]);
+  lZtTrk -> SetFillColor(fColP);
+  lZtTrk -> SetFillStyle(fStyP);
+  lZtTrk -> SetLineColor(fColP);
+  lZtTrk -> SetLineStyle(fStyP);
+  lZtTrk -> SetTextFont(fTxt);
+  lZtTrk -> AddEntry(hZtTrk[0][0], "#pi^{0}-h^{#pm}");
+  lZtTrk -> AddEntry(hZtTrk[0][1], "#gamma^{rich}-h^{#pm}");
+  cout << "    Made legend." << endl;
 
 
   // create directories and save histograms
-  const TString sBins[NBins] = {"eTtrg920", "eTtrg911", "eTtrg1115", "eTtrg1520"};
+  const TString sBins[NBins] = {"eTtrg920", "eTtrg911", "eTtrg1113", "eTtrg1315", "eTtrg1517", "eTtrg1720"};
 
   TDirectory *dBin[NBins];
   for (UInt_t iBin = 0; iBin < NBins; iBin++) {
@@ -1139,6 +1222,82 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
     }
   }
   cout << "    Made directories." << endl;
+
+
+  // draw plots
+  const UInt_t  widthR(750);
+  const UInt_t  heightR(750);
+  const UInt_t  widthDf(1500);
+  const UInt_t  heightDf(750);
+  const UInt_t  widthZt(750);
+  const UInt_t  heightZt(750);
+  const UInt_t  grid(0);
+  const UInt_t  log(1);
+  const Float_t margin(0.);
+  const Float_t xPadDf[NTrgs]    = {0.5, 1.};
+  const TString sRcanvas("cPurity");
+  const TString sDfCanvas[NBins] = {"cDeltaPhi_et920", "cDeltaPhi_et911", "cDeltaPhi_et1113", "cDeltaPhi_et1315", "cDeltaPhi_et1517", "cDeltaPhi_et1720"};
+  const TString sZtCanvas[NBins] = {"cZt_et920", "cZt_et911", "cZt_et1113", "cZt_et1315", "cZt_et1517", "cZt_et1720"};
+  const TString sDfPads[NTrgs]   = {"pPi0", "pGamma"};
+
+  TPad    *pDeltaPhi[NBins][NTrgs];
+  TCanvas *cDeltaPhi[NBins];
+  TCanvas *cZtTrk[NBins];
+  fOutput -> cd();
+
+  for (UInt_t iBin = 0; iBin < NBins; iBin++) {
+
+    // delta-phi plots
+    dBin[iBin] -> cd();
+    cDeltaPhi[iBin]    = new TCanvas(sDfCanvas[iBin].Data(), "", widthDf, heightDf);
+    pDeltaPhi[iBin][0] = new TPad(sDfPads[0].Data(), "", 0., 0., xPadDf[0], 1.);
+    pDeltaPhi[iBin][1] = new TPad(sDfPads[1].Data(), "", xPadDf[0], 0., xPadDf[1], 1.);
+    pDeltaPhi[iBin][0]   -> SetGrid(grid, grid);
+    pDeltaPhi[iBin][0]   -> SetRightMargin(margin);
+    pDeltaPhi[iBin][1]   -> SetGrid(grid, grid);
+    pDeltaPhi[iBin][1]   -> SetLeftMargin(margin);
+    cDeltaPhi[iBin]      -> cd();
+    pDeltaPhi[iBin][0]   -> Draw();
+    pDeltaPhi[iBin][1]   -> Draw();
+    pDeltaPhi[iBin][0]   -> cd();
+    hDeltaPhi[iBin][0]   -> Draw();
+    hDeltaPhiNS[iBin][0] -> Draw("SAME LF HIST");
+    pInfoDf[iBin][0]     -> Draw();
+    pDeltaPhi[iBin][1]   -> cd();
+    hDeltaPhi[iBin][1]   -> Draw();
+    hDeltaPhiNS[iBin][1] -> Draw("SAME LF HIST");
+    pInfoDf[iBin][1]     -> Draw();
+    cDeltaPhi[iBin]      -> Write();
+    cDeltaPhi[iBin]      -> Close();
+
+    // zT plots
+    dBin[iBin] -> cd();
+    cZtTrk[iBin] = new TCanvas(sZtCanvas[iBin].Data(), "", widthZt, heightZt);
+    cZtTrk[iBin]    -> SetGrid(grid, grid);
+    cZtTrk[iBin]    -> SetLogy(log);
+    cZtTrk[iBin]    -> cd();
+    hZtTrk[iBin][0] -> Draw();
+    hZtTrk[iBin][1] -> Draw("same");
+    pInfoZt[iBin]   -> Draw();
+    lZtTrk          -> Draw();
+    cZtTrk[iBin]    -> Write();
+    cZtTrk[iBin]    -> Close();
+
+  }
+
+  fOutput -> cd();
+  TCanvas *cPurity = new TCanvas(sRcanvas.Data(), "", widthR, heightR);
+  cPurity  -> SetGrid(grid, grid);
+  cPurity  -> cd();
+  hPurity  -> Draw();
+  lAverage -> Draw();
+  lAvgUp   -> Draw();
+  lAvgDown -> Draw();
+  pPurity  -> Draw();
+  cPurity  -> Write();
+  cPurity  -> Close();
+  cout << "    Drew plots." << endl;
+
 
   // close files
   fOutput -> cd();
