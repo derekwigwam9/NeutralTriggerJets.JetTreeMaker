@@ -46,8 +46,8 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
   cout << "\n  Beginning average number calculation..." << endl;
 
   // io parameters
-  const TString sOutput("pp200r9.avgReVsUeNums.eTtrg920.r05a065rm1full.d31m1y2018.root");
-  const TString sInput("output/CollaborationMeetingJan2018/pp200r9.withOaCones.eTtrg920.r05rm1full.d21m1y2018.root");
+  const TString sOutput("pp200r9.avgReVsUeNums.eTtrg920.r03a02rm1full.d31m1y2018.root");
+  const TString sInput("output/CollaborationMeetingJan2018/pp200r9.withOaCones.eTtrg920.r03rm1full.d21m1y2018.root");
   const TString sTree("JetTree");
 
   // trigger parameters
@@ -56,9 +56,9 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
   const Double_t gamTsp[2] = {0.2, 0.6};
 
   // jet parameters
-  const TString  sRes("0.5");
-  const Double_t rJet(0.5);
-  const Double_t aJetMin(0.65);
+  const TString  sRes("0.3");
+  const Double_t rJet(0.3);
+  const Double_t aJetMin(0.2);
   const Double_t pTjetMin(0.2);
   const Double_t dFrecoil(TMath::PiOver4());
 
