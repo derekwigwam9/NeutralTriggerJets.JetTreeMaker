@@ -30,15 +30,15 @@ using namespace std;
 static const UInt_t NTrkMax(5000);
 static const UInt_t NTwrMax(5000);
 static const UInt_t NMatchMax(10);
-static const UInt_t NHotTwr(302);
+static const UInt_t NHotTwr(41);
 static const UInt_t NBadRuns(45);
-static const UInt_t NBins(6);
+static const UInt_t NBins(12);
 static const UInt_t NHist(NBins - 1);
 static const UInt_t NTrgs(2);
 
 
 
-void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
+void CalculatePurity(const Bool_t isInBatchMode=false) {
 
   // lower verbosity
   gErrorIgnoreLevel = kError;
@@ -46,7 +46,7 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
 
 
   // io parameters
-  const TString sOutput("pp200r9.purityInclusiveGamma.d30m1y2018.root");
+  const TString sOutput("pp200r9.purityExclusiveGamma.d1m2y2018.root");
   const TString sInput("input/pp200r9.merge.root");
 
   // event parameters
@@ -64,10 +64,12 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
   const Double_t rFitMin(0.52);
   const Double_t dcaMax(1.);
   const Double_t hTrkMax(1.);
-  const Double_t pTtrkMin(0.2);
+  const Double_t pTtrkMin(1.2);
   const Double_t pTtrkMax(20.);
-  const Double_t zTtrkMin(0.3);
-  const Double_t zTtrkMax(0.6);
+  const Double_t zTtrkMin(0.2);
+  const Double_t zTtrkMax(0.3);
+  const TString  sZtTrkMin("0.2");
+  const TString  sZtTrkMax("0.3");
 
   // calculation parameters
   const Double_t dFnear(0.);
@@ -510,18 +512,18 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
 
   // define bad run and hot tower lists
   const UInt_t badRunList[NBadRuns] = {10114082, 10120093, 10159043, 10166054, 10126064, 10128094, 10128102, 10131009, 10131075, 10131087, 10132004, 10135072, 10136036, 10138049, 10140005, 10140011, 10142012, 10142035, 10142093, 10144038, 10144074, 10149008, 10150005, 10151001, 10152010, 10156090, 10157015, 10157053, 10158047, 10160006, 10161006, 10161016, 10161024, 10162007, 10165027, 10165077, 10166024, 10169033, 10170011, 10170029, 10170047, 10171011, 10172054, 10172059, 10172077};
-  const UInt_t hotTwrList[NHotTwr] = {34, 106, 113, 160, 266, 267, 275, 280, 282, 286, 287, 293, 410, 504, 533, 541, 555, 561, 562, 594, 615, 616, 629, 633, 637, 638, 647, 650, 653, 657, 671, 673, 743, 789, 790, 791, 792, 806, 809, 810, 811, 812, 813, 814, 821, 822, 823, 824, 829, 830, 831, 832, 837, 841, 842, 843, 844, 846, 849, 850, 851, 852, 857, 875, 897, 899, 903, 939, 953, 954, 956, 993, 1026, 1046, 1048, 1080, 1081, 1100, 1125, 1130, 1132, 1180, 1197, 1198, 1199, 1200, 1207, 1217, 1218, 1219, 1220, 1221, 1222, 1223, 1224, 1237, 1238, 1240, 1241, 1242, 1243, 1244, 1257, 1258, 1259, 1260, 1312, 1348, 1353, 1354, 1388, 1407, 1409, 1434, 1448, 1537, 1567, 1574, 1597, 1612, 1654, 1668, 1713, 1762, 1765, 1766, 1877, 1878, 1984, 2032, 2043, 2054, 2073, 2077, 2092, 2093, 2097, 2107, 2162, 2168, 2214, 2305, 2392, 2409, 2415, 2439, 2459, 2589, 2590, 2633, 2652, 2749, 2834, 2961, 2969, 3005, 3017, 3070, 3071, 3186, 3220, 3289, 3360, 3493, 3494, 3495, 3508, 3588, 3604, 3611, 3668, 3678, 3679, 3690, 3692, 3732, 3738, 3838, 3840, 3927, 3945, 4005, 4006, 4013, 4018, 4019, 4053, 4059, 4124, 4331, 4355, 4357, 4458, 4464, 4500, 4677, 4678, 4684, 4768, 360, 493, 779, 1284, 1306, 1337, 1438, 1709, 2027, 2445, 3407, 3720, 4217, 4288, 95, 96, 296, 316, 443, 479, 555, 562, 637, 671, 709, 740, 743, 796, 857, 897, 899, 915, 953, 1130, 1132, 1294, 1318, 1337, 1348, 1359, 1378, 1427, 1429, 1440, 1537, 1563, 1574, 1709, 1763, 1773, 1819, 1854, 1874, 1936, 1938, 2018, 2043, 2098, 2099, 2256, 2259, 2294, 2514, 2520, 2552, 2589, 2598, 2680, 2706, 2799, 2880, 2897, 2917, 2969, 3020, 3028, 3310, 3319, 3375, 3399, 3504, 3539, 3541, 3679, 3690, 3692, 3718, 3719, 3720, 3738, 3806, 3838, 3840, 3928, 4013, 4017, 4038, 4053, 4057, 4058, 4079, 4097, 4099};
+  const UInt_t hotTwrList[NHotTwr] = {1, 35, 141, 187, 224, 341, 424, 594, 814, 899, 900, 1046, 1128, 1132, 1244, 1382, 1388, 1405, 1588, 1766, 1773, 2066, 2160, 2253, 2281, 2284, 2301, 2303, 2306, 2590, 3007, 3495, 3840, 4043, 4047, 4053, 4057, 4121, 4442, 4569, 4617};
   cout << "    Bad run and hot tower lists defined:\n"
        << "      " << NBadRuns << " bad runs, " << NHotTwr << " hot towers."
        << endl;
 
 
   // define trigger bins
-  const Double_t eTtrgMin[NBins] = {9., 9., 11., 13., 15., 17.};
-  const Double_t eTtrgMax[NBins] = {20., 11., 13., 15., 17., 20.};
-  const Double_t eTtrgBin[NBins] = {9., 11., 13., 15., 17., 20.};
-  const Double_t tspMin[NTrgs]   = {0., 0.};
-  const Double_t tspMax[NTrgs]   = {0.08, 100.};
+  const Double_t eTtrgMin[NBins] = {9., 9., 10., 11., 12., 13., 14., 15., 16., 17., 18., 19.};
+  const Double_t eTtrgMax[NBins] = {20., 10., 11., 12., 13., 14., 15., 16., 17., 18., 19., 20.};
+  const Double_t eTtrgBin[NBins] = {9., 10., 11., 12., 13., 14., 15., 16., 17., 18., 19., 20.};
+  const Double_t tspMin[NTrgs]   = {0., 0.2};
+  const Double_t tspMax[NTrgs]   = {0.08, 0.6};
 
   cout << "    Trigger bins:" << endl;
   for (UInt_t iBin = 0; iBin < NBins; iBin++) {
@@ -537,6 +539,7 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
   TH1D *hZtTrk[NBins][NTrgs];
   TH1D *hZtCalc[NBins][NTrgs];
 
+  // binning
   const UInt_t   nDf   = 60;
   const UInt_t   nH    = 40;
   const UInt_t   nPt   = 40;
@@ -545,88 +548,58 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
   const Double_t h[2]  = {-1., 1.};
   const Double_t pT[2] = {0., 40.};
   const Double_t zT[2] = {0., 1.};
-  hDeltaPhi[0][0]   = new TH1D("hDeltaPhi_pi920", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[0][1]   = new TH1D("hDeltaPhi_ga920", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[1][0]   = new TH1D("hDeltaPhi_pi911", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[1][1]   = new TH1D("hDeltaPhi_ga911", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[2][0]   = new TH1D("hDeltaPhi_pi1113", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[2][1]   = new TH1D("hDeltaPhi_ga1113", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[3][0]   = new TH1D("hDeltaPhi_pi1315", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[3][1]   = new TH1D("hDeltaPhi_ga1315", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[4][0]   = new TH1D("hDeltaPhi_pi1517", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[4][1]   = new TH1D("hDeltaPhi_ga1517", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[5][0]   = new TH1D("hDeltaPhi_pi1720", "", nDf, dF[0], dF[1]);
-  hDeltaPhi[5][1]   = new TH1D("hDeltaPhi_ga1720", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[0][0] = new TH1D("hDeltaPhiNS_pi920", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[0][1] = new TH1D("hDeltaPhiNS_ga920", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[1][0] = new TH1D("hDeltaPhiNS_pi911", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[1][1] = new TH1D("hDeltaPhiNS_ga911", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[2][0] = new TH1D("hDeltaPhiNS_pi1113", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[2][1] = new TH1D("hDeltaPhiNS_ga1113", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[3][0] = new TH1D("hDeltaPhiNS_pi1315", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[3][1] = new TH1D("hDeltaPhiNS_ga1315", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[4][0] = new TH1D("hDeltaPhiNS_pi1517", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[4][1] = new TH1D("hDeltaPhiNS_ga1517", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[5][0] = new TH1D("hDeltaPhiNS_pi1720", "", nDf, dF[0], dF[1]);
-  hDeltaPhiNS[5][1] = new TH1D("hDeltaPhiNS_ga1720", "", nDf, dF[0], dF[1]);
-  hEtaTrk[0][0]     = new TH1D("hEtaTrk_pi920", "", nH, h[0], h[1]);
-  hEtaTrk[0][1]     = new TH1D("hEtaTrk_ga920", "", nH, h[0], h[1]);
-  hEtaTrk[1][0]     = new TH1D("hEtaTrk_pi911", "", nH, h[0], h[1]);
-  hEtaTrk[1][1]     = new TH1D("hEtaTrk_ga911", "", nH, h[0], h[1]);
-  hEtaTrk[2][0]     = new TH1D("hEtaTrk_pi1113", "", nH, h[0], h[1]);
-  hEtaTrk[2][1]     = new TH1D("hEtaTrk_ga1113", "", nH, h[0], h[1]);
-  hEtaTrk[3][0]     = new TH1D("hEtaTrk_pi1315", "", nH, h[0], h[1]);
-  hEtaTrk[3][1]     = new TH1D("hEtaTrk_ga1315", "", nH, h[0], h[1]);
-  hEtaTrk[4][0]     = new TH1D("hEtaTrk_pi1517", "", nH, h[0], h[1]);
-  hEtaTrk[4][1]     = new TH1D("hEtaTrk_ga1517", "", nH, h[0], h[1]);
-  hEtaTrk[5][0]     = new TH1D("hEtaTrk_pi1720", "", nH, h[0], h[1]);
-  hEtaTrk[5][1]     = new TH1D("hEtaTrk_ga1720", "", nH, h[0], h[1]);
-  hPtTrk[0][0]      = new TH1D("hPtTrk_pi920", "", nPt, pT[0], pT[1]);
-  hPtTrk[0][1]      = new TH1D("hPtTrk_ga920", "", nPt, pT[0], pT[1]);
-  hPtTrk[1][0]      = new TH1D("hPtTrk_pi911", "", nPt, pT[0], pT[1]);
-  hPtTrk[1][1]      = new TH1D("hPtTrk_ga911", "", nPt, pT[0], pT[1]);
-  hPtTrk[2][0]      = new TH1D("hPtTrk_pi1113", "", nPt, pT[0], pT[1]);
-  hPtTrk[2][1]      = new TH1D("hPtTrk_ga1113", "", nPt, pT[0], pT[1]);
-  hPtTrk[3][0]      = new TH1D("hPtTrk_pi1315", "", nPt, pT[0], pT[1]);
-  hPtTrk[3][1]      = new TH1D("hPtTrk_ga1315", "", nPt, pT[0], pT[1]);
-  hPtTrk[4][0]      = new TH1D("hPtTrk_pi1517", "", nPt, pT[0], pT[1]);
-  hPtTrk[4][1]      = new TH1D("hPtTrk_ga1517", "", nPt, pT[0], pT[1]);
-  hPtTrk[5][0]      = new TH1D("hPtTrk_pi1720", "", nPt, pT[0], pT[1]);
-  hPtTrk[5][1]      = new TH1D("hPtTrk_ga1720", "", nPt, pT[0], pT[1]);
-  hZtTrk[0][0]      = new TH1D("hZtTrk_pi920", "", nZt, zT[0], zT[1]);
-  hZtTrk[0][1]      = new TH1D("hZtTrk_ga920", "", nZt, zT[0], zT[1]);
-  hZtTrk[1][0]      = new TH1D("hZtTrk_pi911", "", nZt, zT[0], zT[1]);
-  hZtTrk[1][1]      = new TH1D("hZtTrk_ga911", "", nZt, zT[0], zT[1]);
-  hZtTrk[2][0]      = new TH1D("hZtTrk_pi1113", "", nZt, zT[0], zT[1]);
-  hZtTrk[2][1]      = new TH1D("hZtTrk_ga1113", "", nZt, zT[0], zT[1]);
-  hZtTrk[3][0]      = new TH1D("hZtTrk_pi1315", "", nZt, zT[0], zT[1]);
-  hZtTrk[3][1]      = new TH1D("hZtTrk_ga1315", "", nZt, zT[0], zT[1]);
-  hZtTrk[4][0]      = new TH1D("hZtTrk_pi1517", "", nZt, zT[0], zT[1]);
-  hZtTrk[4][1]      = new TH1D("hZtTrk_ga1517", "", nZt, zT[0], zT[1]);
-  hZtTrk[5][0]      = new TH1D("hZtTrk_pi1720", "", nZt, zT[0], zT[1]);
-  hZtTrk[5][1]      = new TH1D("hZtTrk_ga1720", "", nZt, zT[0], zT[1]);
-  hZtCalc[0][0]     = new TH1D("hZtCalc_pi920", "", nZt, zT[0], zT[1]);
-  hZtCalc[0][1]     = new TH1D("hZtCalc_ga920", "", nZt, zT[0], zT[1]);
-  hZtCalc[1][0]     = new TH1D("hZtCalc_pi911", "", nZt, zT[0], zT[1]);
-  hZtCalc[1][1]     = new TH1D("hZtCalc_ga911", "", nZt, zT[0], zT[1]);
-  hZtCalc[2][0]     = new TH1D("hZtCalc_pi1113", "", nZt, zT[0], zT[1]);
-  hZtCalc[2][1]     = new TH1D("hZtCalc_ga1113", "", nZt, zT[0], zT[1]);
-  hZtCalc[3][0]     = new TH1D("hZtCalc_pi1315", "", nZt, zT[0], zT[1]);
-  hZtCalc[3][1]     = new TH1D("hZtCalc_ga1315", "", nZt, zT[0], zT[1]);
-  hZtCalc[4][0]     = new TH1D("hZtCalc_pi1517", "", nZt, zT[0], zT[1]);
-  hZtCalc[4][1]     = new TH1D("hZtCalc_ga1517", "", nZt, zT[0], zT[1]);
-  hZtCalc[5][0]     = new TH1D("hZtCalc_pi1720", "", nZt, zT[0], zT[1]);
-  hZtCalc[5][1]     = new TH1D("hZtCalc_ga1720", "", nZt, zT[0], zT[1]);
+
+  // names
+  const TString sDeltaPhi("hDeltaPhi_");
+  const TString sDeltaPhiNS("hDeltaPhiNS_");
+  const TString sEtaTrk("hEtaTrk_");
+  const TString sPtTrk("hPtTrk_");
+  const TString sZtTrk("hZtTrk_");
+  const TString sZtCalc("hZtCalc_");
+  const TString sTrgNames[NTrgs] = {"pi", "ga"};
+  const TString sEtNames[NBins]  = {"920", "910", "1011", "1112", "1213", "1314", "1415", "1516", "1617", "1718", "1819", "1920"};
+
+  fOutput -> cd();
   for (UInt_t iBin = 0; iBin < NBins; iBin++) {
     for (UInt_t iTrg = 0; iTrg < NTrgs; iTrg++) {
+
+      // add bin names
+      TString sDeltaPhiName(sDeltaPhi.Data());
+      TString sDeltaPhiNsName(sDeltaPhiNS.Data());
+      TString sEtaTrkName(sEtaTrk.Data());
+      TString sPtTrkName(sPtTrk.Data());
+      TString sZtTrkName(sZtTrk.Data());
+      TString sZtCalcName(sZtCalc.Data());
+      sDeltaPhiName   += sTrgNames[iTrg].Data();
+      sDeltaPhiName   += sEtNames[iBin].Data();
+      sDeltaPhiNsName += sTrgNames[iTrg].Data();
+      sDeltaPhiNsName += sEtNames[iBin].Data();
+      sEtaTrkName     += sTrgNames[iTrg].Data();
+      sEtaTrkName     += sEtNames[iBin].Data();
+      sPtTrkName      += sTrgNames[iTrg].Data();
+      sPtTrkName      += sEtNames[iBin].Data();
+      sZtTrkName      += sTrgNames[iTrg].Data();
+      sZtTrkName      += sEtNames[iBin].Data();
+      sZtCalcName     += sTrgNames[iTrg].Data();
+      sZtCalcName     += sEtNames[iBin].Data();
+
+      // create histograms
+      hDeltaPhi[iBin][iTrg]   = new TH1D(sDeltaPhiName.Data(), "", nDf, dF[0], dF[1]);
+      hDeltaPhiNS[iBin][iTrg] = new TH1D(sDeltaPhiNsName.Data(), "", nDf, dF[0], dF[1]);
+      hEtaTrk[iBin][iTrg]     = new TH1D(sEtaTrkName.Data(), "", nH, h[0], h[1]);
+      hPtTrk[iBin][iTrg]      = new TH1D(sPtTrkName.Data(), "", nPt, pT[0], pT[1]);
+      hZtTrk[iBin][iTrg]      = new TH1D(sZtTrkName.Data(), "", nZt, zT[0], zT[1]);
+      hZtCalc[iBin][iTrg]     = new TH1D(sZtCalcName.Data(), "", nZt, zT[0], zT[1]);
       hDeltaPhi[iBin][iTrg]   -> Sumw2();
       hDeltaPhiNS[iBin][iTrg] -> Sumw2();
       hEtaTrk[iBin][iTrg]     -> Sumw2();
       hPtTrk[iBin][iTrg]      -> Sumw2();
       hZtTrk[iBin][iTrg]      -> Sumw2();
       hZtCalc[iBin][iTrg]     -> Sumw2();
+
     }
   }
+  cout << "    Made histograms." << endl;
 
 
   const UInt_t nEvts = tInput -> GetEntriesFast();
@@ -998,6 +971,8 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
   const UInt_t  fCol[NTrgs]  = {859, 899};
   const UInt_t  fMarZ[NTrgs] = {27, 24};
   const Float_t fLab(0.03);
+  const Float_t fOffsetX(1.);
+  const Float_t dFrange[2] = {0., 1.03};
   const TString sTitleX("#Delta#varphi^{trk} = #varphi^{trk} - #varphi^{trg}");
   const TString sTitleY("D^{NS}_{pp}");
   const TString sTitleXR("E_{T}^{trg} [GeV]");
@@ -1027,12 +1002,14 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
       hDeltaPhi[iBin][iTrg] -> SetTitleFont(fTxt);
       hDeltaPhi[iBin][iTrg] -> GetXaxis() -> SetTitle(sTitleX.Data());
       hDeltaPhi[iBin][iTrg] -> GetXaxis() -> SetTitleFont(fTxt);
+      hDeltaPhi[iBin][iTrg] -> GetXaxis() -> SetTitleOffset(fOffsetX);
       hDeltaPhi[iBin][iTrg] -> GetXaxis() -> CenterTitle(fCnt);
       hDeltaPhi[iBin][iTrg] -> GetXaxis() -> SetLabelSize(fLab);
       hDeltaPhi[iBin][iTrg] -> GetYaxis() -> SetTitle(sTitleY.Data());
       hDeltaPhi[iBin][iTrg] -> GetYaxis() -> SetTitleFont(fTxt);
       hDeltaPhi[iBin][iTrg] -> GetYaxis() -> CenterTitle(fCnt);
       hDeltaPhi[iBin][iTrg] -> GetYaxis() -> SetLabelSize(fLab);
+      hDeltaPhi[iBin][iTrg] -> GetYaxis() -> SetRangeUser(dFrange[0], dFrange[1]);
 
       // near-side delta phi histograms
       hDeltaPhiNS[iBin][iTrg] -> SetFillStyle(fFilNS);
@@ -1045,12 +1022,14 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
       hDeltaPhiNS[iBin][iTrg] -> SetTitleFont(fTxt);
       hDeltaPhiNS[iBin][iTrg] -> GetXaxis() -> SetTitle(sTitleX.Data());
       hDeltaPhiNS[iBin][iTrg] -> GetXaxis() -> SetTitleFont(fTxt);
+      hDeltaPhiNS[iBin][iTrg] -> GetXaxis() -> SetTitleOffset(fOffsetX);
       hDeltaPhiNS[iBin][iTrg] -> GetXaxis() -> CenterTitle(fCnt);
       hDeltaPhiNS[iBin][iTrg] -> GetXaxis() -> SetLabelSize(fLab);
       hDeltaPhiNS[iBin][iTrg] -> GetYaxis() -> SetTitle(sTitleY.Data());
       hDeltaPhiNS[iBin][iTrg] -> GetYaxis() -> SetTitleFont(fTxt);
       hDeltaPhiNS[iBin][iTrg] -> GetYaxis() -> CenterTitle(fCnt);
       hDeltaPhiNS[iBin][iTrg] -> GetYaxis() -> SetLabelSize(fLab);
+      hDeltaPhiNS[iBin][iTrg] -> GetYaxis() -> SetRangeUser(dFrange[0], dFrange[1]);
 
       // zT histograms
       hZtTrk[iBin][iTrg] -> SetLineColor(fCol[iTrg]);
@@ -1059,6 +1038,7 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
       hZtTrk[iBin][iTrg] -> GetXaxis() -> SetTitle(sXaxis.Data());
       hZtTrk[iBin][iTrg] -> GetXaxis() -> SetTitleFont(fTxt);
       hZtTrk[iBin][iTrg] -> GetXaxis() -> CenterTitle(fCnt);
+      hZtTrk[iBin][iTrg] -> GetXaxis() -> SetTitleOffset(fOffsetX);
       hZtTrk[iBin][iTrg] -> GetXaxis() -> SetLabelSize(fLab);
       hZtTrk[iBin][iTrg] -> GetYaxis() -> SetTitle(sTitleYZ.Data());
       hZtTrk[iBin][iTrg] -> GetYaxis() -> SetTitleFont(fTxt);
@@ -1073,6 +1053,7 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
   hPurity -> GetXaxis() -> SetTitle(sTitleXR.Data());
   hPurity -> GetXaxis() -> SetTitleFont(fTxt);
   hPurity -> GetXaxis() -> CenterTitle(fCnt);
+  hPurity -> GetXaxis() -> SetTitleOffset(fOffsetX);
   hPurity -> GetXaxis() -> SetLabelSize(fLab);
   hPurity -> GetYaxis() -> SetTitle(sTitleYR.Data());
   hPurity -> GetYaxis() -> SetTitleFont(fTxt);
@@ -1111,9 +1092,9 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
     sEtTrg   += ", ";
     sEtTrg   += eTtrgMax[iBin];
     sEtTrg   += ")";
-    sZtTrk   += zTtrkMin;
+    sZtTrk   += sZtTrkMin.Data();
     sZtTrk   += ", ";
-    sZtTrk   += zTtrkMax;
+    sZtTrk   += sZtTrkMax.Data();
     sZtTrk   += ")";
     sKinetic += sEtTrg.Data();
     sKinetic += " #otimes ";
@@ -1153,12 +1134,12 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
 
       TString sPed("ped. = ");
       TString sYield("yield = ");
-      TString sNumbers;
+      TString sNumbers("");
       sPed     += sPedTxt;
       sYield   += sYieldTxt;
-      sNumbers += sPedTxt.Data();
+      sNumbers += sPed.Data();
       sNumbers += ", ";
-      sNumbers += sYieldTxt.Data();
+      sNumbers += sYield.Data();
 
       // add text
       pInfoDf[iBin][iTrg] -> AddText(sSystem.Data());
@@ -1174,9 +1155,9 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
   sEtAvg += ", ";
   sEtAvg += eTtrgMax[0];
   sEtAvg += ") #otimes z_{T}^{trk} #in (";
-  sEtAvg += zTtrkMin;
+  sEtAvg += sZtTrkMin;
   sEtAvg += ", ";
-  sEtAvg += zTtrkMax;
+  sEtAvg += sZtTrkMax;
   sEtAvg += ")";
 
   TString sRraw("");
@@ -1226,11 +1207,16 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
 
 
   // create directories and save histograms
-  const TString sBins[NBins] = {"eTtrg920", "eTtrg911", "eTtrg1113", "eTtrg1315", "eTtrg1517", "eTtrg1720"};
+  const TString sDir("eTtrg");
 
   TDirectory *dBin[NBins];
   for (UInt_t iBin = 0; iBin < NBins; iBin++) {
-    dBin[iBin] = (TDirectory*) fOutput -> mkdir(sBins[iBin].Data());
+    // make name
+    TString sDirName(sDir.Data());
+    sDirName += sEtNames[iBin].Data();
+
+    // make directory
+    dBin[iBin] = (TDirectory*) fOutput -> mkdir(sDirName.Data());
     dBin[iBin] -> cd();
     for (iTrg = 0; iTrg < NTrgs; iTrg++) {
       hDeltaPhi[iBin][iTrg]   -> Write();
@@ -1252,12 +1238,13 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
   const UInt_t  heightZt(750);
   const UInt_t  grid(0);
   const UInt_t  log(1);
+  const UInt_t  tick(1);
   const Float_t margin(0.);
   const Float_t xPadDf[NTrgs]    = {0.5, 1.};
   const TString sRcanvas("cPurity");
-  const TString sDfCanvas[NBins] = {"cDeltaPhi_et920", "cDeltaPhi_et911", "cDeltaPhi_et1113", "cDeltaPhi_et1315", "cDeltaPhi_et1517", "cDeltaPhi_et1720"};
-  const TString sZtCanvas[NBins] = {"cZt_et920", "cZt_et911", "cZt_et1113", "cZt_et1315", "cZt_et1517", "cZt_et1720"};
-  const TString sDfPads[NTrgs]   = {"pPi0", "pGamma"};
+  const TString sDfCanvas("cDeltaPhi_");
+  const TString sZtCanvas("cZt_");
+  const TString sDfPads[NTrgs] = {"pPi0", "pGamma"};
 
   TPad    *pDeltaPhi[NBins][NTrgs];
   TCanvas *cDeltaPhi[NBins];
@@ -1266,14 +1253,22 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
 
   for (UInt_t iBin = 0; iBin < NBins; iBin++) {
 
+    // make canvas names
+    TString sDfCanvasName(sDfCanvas.Data());
+    TString sZtCanvasName(sZtCanvas.Data());
+    sDfCanvasName += "et";
+    sDfCanvasName += sEtNames[iBin].Data();
+
     // delta-phi plots
     dBin[iBin] -> cd();
-    cDeltaPhi[iBin]    = new TCanvas(sDfCanvas[iBin].Data(), "", widthDf, heightDf);
+    cDeltaPhi[iBin]    = new TCanvas(sDfCanvasName.Data(), "", widthDf, heightDf);
     pDeltaPhi[iBin][0] = new TPad(sDfPads[0].Data(), "", 0., 0., xPadDf[0], 1.);
     pDeltaPhi[iBin][1] = new TPad(sDfPads[1].Data(), "", xPadDf[0], 0., xPadDf[1], 1.);
     pDeltaPhi[iBin][0]   -> SetGrid(grid, grid);
+    pDeltaPhi[iBin][0]   -> SetTicks(tick, tick);
     pDeltaPhi[iBin][0]   -> SetRightMargin(margin);
     pDeltaPhi[iBin][1]   -> SetGrid(grid, grid);
+    pDeltaPhi[iBin][1]   -> SetTicks(tick, tick);
     pDeltaPhi[iBin][1]   -> SetLeftMargin(margin);
     cDeltaPhi[iBin]      -> cd();
     pDeltaPhi[iBin][0]   -> Draw();
@@ -1291,8 +1286,9 @@ void CalculatePurity_Inclusive(const Bool_t isInBatchMode=false) {
 
     // zT plots
     dBin[iBin] -> cd();
-    cZtTrk[iBin] = new TCanvas(sZtCanvas[iBin].Data(), "", widthZt, heightZt);
+    cZtTrk[iBin] = new TCanvas(sZtCanvasName.Data(), "", widthZt, heightZt);
     cZtTrk[iBin]    -> SetGrid(grid, grid);
+    cZtTrk[iBin]    -> SetTicks(tick, tick);
     cZtTrk[iBin]    -> SetLogy(log);
     cZtTrk[iBin]    -> cd();
     hZtTrk[iBin][0] -> Draw();
