@@ -36,6 +36,7 @@ static const UInt_t NBinsEt = 4;
 static const UInt_t NBinsId = 2;
 static const UInt_t NBinsDf = 3;
 static const UInt_t NPadsPt = 2;
+static const UInt_t JetType = 1;
 
 
 
@@ -45,8 +46,8 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
   cout << "\n  Beginning average number calculation..." << endl;
 
   // io parameters
-  const TString sOutput("test.root");
-  const TString sInput("output/CollaborationMeetingJan2018/pp200r9.withOaCones.eTtrg920.r05rm1full.d21m1y2018.root");
+  const TString sOutput("pp200r9.avgReVsUeNums.eTtrg920.r03a02rm1full.d31m1y2018.root");
+  const TString sInput("output/CollaborationMeetingJan2018/pp200r9.withOaCones.eTtrg920.r03rm1full.d21m1y2018.root");
   const TString sTree("JetTree");
 
   // trigger parameters
@@ -55,8 +56,9 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
   const Double_t gamTsp[2] = {0.2, 0.6};
 
   // jet parameters
-  const Double_t rJet(0.5);
-  const Double_t aJetMin(0.65);
+  const TString  sRes("0.3");
+  const Double_t rJet(0.3);
+  const Double_t aJetMin(0.2);
   const Double_t pTjetMin(0.2);
   const Double_t dFrecoil(TMath::PiOver4());
 
@@ -350,8 +352,7 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
     }
   }
 
-  const UInt_t nEvts = 10000;
-  //const UInt_t nEvts = tInput -> GetEntries();
+  const UInt_t nEvts = tInput -> GetEntries();
   cout << "    Beginning event loop: " << nEvts << " events to process..." << endl;
 
 
@@ -484,6 +485,12 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
       if (!isInAreaCut || !isInPtCut) continue;
 
 
+      // delta-phi plot
+      if (recoilJetIsPresent) {
+        hDfJet[0][idBin]     -> Fill(dFjet);
+        hDfJet[eTbin][idBin] -> Fill(dFjet);
+      }
+
       // determine dF region
       for (UInt_t iBinDf = 0; iBinDf < NBinsDf; iBinDf++) {
         const Bool_t isInLowerCone = ((dFjet > dFdownMin[iBinDf]) && (dFjet < dFdownMax[iBinDf]));
@@ -504,8 +511,6 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
         nJetRE[0][idBin]++;
         nJetRE[eTbin][idBin]++;
       }
-      hDfJet[0][idBin]     -> Fill(dFjet);
-      hDfJet[eTbin][idBin] -> Fill(dFjet);
 
     }  // end jet loop 2
 
@@ -643,17 +648,19 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
   const UInt_t  fMarD(1);
   const UInt_t  fMarP(20);
   const UInt_t  fLinD(2);
-  const UInt_t  fFilR(3444);
+  const UInt_t  fFilR(3354);
   const UInt_t  fColR[NBinsId] = {859, 899};
   const UInt_t  fMarR[NBinsId] = {29, 20};
   const UInt_t  fColU[NBinsDf] = {810, 830, 850};
   const UInt_t  fMarU[NBinsDf] = {24, 26, 28};
-  const UInt_t  fFilU[NBinsDf] = {3345, 3305, 3354};
+  const UInt_t  fFilU[NBinsDf] = {3345, 3354, 3345};
   const Float_t fLab(0.03);
   const Float_t fSizR(0.074);
   const Float_t fOffsetX(1.);
   const Float_t fOffsetY(1.07);
   const Float_t fNumX[2] = {0., 20.};
+  const Float_t fDfY[2]  = {0., 1.7};
+  const Float_t fNumY[2] = {0.000007, 7.};
   const TString sTitleXdf("#Delta#varphi = #varphi^{jet} - #varphi^{trg}");
   const TString sTitleXnr("N^{jet}_{RE}");
   const TString sTitleXnu("N^{jet}_{UE}");
@@ -715,6 +722,7 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
       hDfRE[iBinEt][iBinId]  -> GetYaxis() -> SetTitleOffset(fOffsetY);
       hDfRE[iBinEt][iBinId]  -> GetYaxis() -> CenterTitle(fCnt);
       hDfRE[iBinEt][iBinId]  -> GetYaxis() -> SetLabelSize(fLab);
+      hDfRE[iBinEt][iBinId]  -> GetYaxis() -> SetRangeUser(fDfY[0], fDfY[1]);
       hDfRE[iBinEt][iBinId]  -> GetZaxis() -> SetLabelSize(fLab);
       for (UInt_t iBinDf = 0; iBinDf < NBinsDf; iBinDf++) {
         hDfUE[iBinEt][iBinId][iBinDf] -> SetFillStyle(fFilU[iBinDf]);
@@ -735,6 +743,7 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
         hDfUE[iBinEt][iBinId][iBinDf] -> GetYaxis() -> SetTitleOffset(fOffsetY);
         hDfUE[iBinEt][iBinId][iBinDf] -> GetYaxis() -> CenterTitle(fCnt);
         hDfUE[iBinEt][iBinId][iBinDf] -> GetYaxis() -> SetLabelSize(fLab);
+        hDfUE[iBinEt][iBinId][iBinDf] -> GetYaxis() -> SetRangeUser(fDfY[0], fDfY[1]);
         hDfUE[iBinEt][iBinId][iBinDf] -> GetZaxis() -> SetLabelSize(fLab);
       }
 
@@ -755,6 +764,7 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
       hNumRE[iBinEt][iBinId] -> GetYaxis() -> SetTitleOffset(fOffsetY);
       hNumRE[iBinEt][iBinId] -> GetYaxis() -> CenterTitle(fCnt);
       hNumRE[iBinEt][iBinId] -> GetYaxis() -> SetLabelSize(fLab);
+      hNumRE[iBinEt][iBinId] -> GetYaxis() -> SetRangeUser(fNumY[0], fNumY[1]);
       for (UInt_t iBinDf = 0; iBinDf < NBinsDf; iBinDf++) {
         hNumUE[iBinEt][iBinId][iBinDf] -> SetLineColor(fColU[iBinDf]);
         hNumUE[iBinEt][iBinId][iBinDf] -> SetMarkerStyle(fMarU[iBinDf]);
@@ -772,6 +782,7 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
         hNumUE[iBinEt][iBinId][iBinDf] -> GetYaxis() -> SetTitleOffset(fOffsetY);
         hNumUE[iBinEt][iBinId][iBinDf] -> GetYaxis() -> CenterTitle(fCnt);
         hNumUE[iBinEt][iBinId][iBinDf] -> GetYaxis() -> SetLabelSize(fLab);
+        hNumUE[iBinEt][iBinId][iBinDf] -> GetYaxis() -> SetRangeUser(fNumY[0], fNumY[1]);
 
         // 2d number histograms
         hNumUeVsRe[iBinEt][iBinId][iBinDf] -> SetTitle(sTitleN[iBinId].Data());
@@ -815,8 +826,10 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
 
   const UInt_t  fColAU(878);
   const UInt_t  fMarAU(25);
+  const UInt_t  fSizAU(1.5);
   const UInt_t  fColAR[NBinsId]  = {858, 898};
   const UInt_t  fMarAR[NBinsId]  = {24, 24};
+  const UInt_t  fSizAR[NBinsId]  = {1.5, 1.5};
   const Float_t fOffsetYA(1.17);
   const Float_t fRangeY[2]       = {0., 1.23};
   const TString sTitleA[NBinsId] = {"#pi^{0} trigger", "#gamma^{rich} trigger"};
@@ -839,6 +852,7 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
     hAvgRE[iBinId] -> SetLineColor(fColAR[iBinId]);
     hAvgRE[iBinId] -> SetMarkerStyle(fMarAR[iBinId]);
     hAvgRE[iBinId] -> SetMarkerColor(fColAR[iBinId]);
+    hAvgRE[iBinId] -> SetMarkerSize(fSizAR[iBinId]);
     hAvgRE[iBinId] -> SetTitle(sTitleA[iBinId].Data());
     hAvgRE[iBinId] -> SetTitleFont(fTxt);
     hAvgRE[iBinId] -> GetXaxis() -> SetTitle(sTitleAX.Data());
@@ -856,6 +870,7 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
       hAvgUE[iBinId][iBinDf] -> SetLineColor(fColAU);
       hAvgUE[iBinId][iBinDf] -> SetMarkerStyle(fMarAU);
       hAvgUE[iBinId][iBinDf] -> SetMarkerColor(fColAU);
+      hAvgUE[iBinId][iBinDf] -> SetMarkerSize(fSizAU);
       hAvgUE[iBinId][iBinDf] -> SetTitle(sTitleA[iBinId].Data());
       hAvgUE[iBinId][iBinDf] -> SetTitleFont(fTxt);
       hAvgUE[iBinId][iBinDf] -> GetXaxis() -> SetTitle(sTitleAX.Data());
@@ -875,68 +890,13 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
   cout << "    Set styles." << endl;
 
 
-  // make labels
-  const UInt_t  fColT(0);
-  const UInt_t  fFilT(0);
-  const UInt_t  fLinT(0);
-  const UInt_t  fAlign(12);
-  const UInt_t  fSize(21);
-  const Float_t xText[2] = {0.7, 0.9};
-  const Float_t yText[2] = {0.7, 0.9};
-  const Float_t xLeg[2]  = {0.5, 0.7};
-  const Float_t yLeg[2]  = {0.7, 0.9};
-  const TString sSystem("pp-collsions, #sqrt{s} = 200 GeV");
-  const TString sTrigger("E_{T}^{trg} #in (");
-  const TString sJet("anti-k_{T}, R = ");
-  const TString sChrg("#bf{charged jets}");
-  const TString sFull("#bf{full jets}");
-
-  TPaveText *pInfo[NBinsId];
-  TPaveText *pAvgEt[NBinsId];
-  TPaveText *pAvgNums[NBinsEt][NBinsId];
-  TLegend   *lDeltaPhi[NBinsId];
-  TLegend   *lNums[NBinsId];
-  TLegend   *lAvg[NBinsId];
-  for (UInt_t iBinId = 0; iBinId < NBinsId; iBinId++) {
-
-    // delta-phi legend
-    lDeltaPhi[iBinId] = new TLegend(xLeg[0], yLeg[0], xLeg[1], yLeg[1]);
-    lDeltaPhi[iBinId] -> SetFillColor(fColT);
-    lDeltaPhi[iBinId] -> SetFillStyle(fFilT);
-    lDeltaPhi[iBinId] -> SetLineColor(fColT);
-    lDeltaPhi[iBinId] -> SetLineStyle(fLinT);
-    lDeltaPhi[iBinId] -> SetTextFont(fTxt);
-    lDeltaPhi[iBinId] -> SetTextSize(fSize);
-    lDeltaPhi[iBinId] -> AddEntry(hDfJet[0][iBinId], "all jets");
-    lDeltaPhi[iBinId] -> AddEntry(hDfRE[0][iBinId], "RE");
-    lDeltaPhi[iBinId] -> AddEntry(hDfUE[0][iBinId][0], "UE[0]");
-    lDeltaPhi[iBinId] -> AddEntry(hDfUE[0][iBinId][1], "UE[1]");
-    lDeltaPhi[iBinId] -> AddEntry(hDfUE[0][iBinId][2], "UE[2]");
-
-    // number legend
-    lNums[iBinId] = new TLegend(xLeg[0], yLeg[0], xLeg[1], yLeg[1]);
-    lNums[iBinId] -> SetFillColor(fColT);
-    lNums[iBinId] -> SetFillStyle(fFilT);
-    lNums[iBinId] -> SetLineColor(fColT);
-    lNums[iBinId] -> SetLineStyle(fLinT);
-    lNums[iBinId] -> SetTextFont(fTxt);
-    lNums[iBinId] -> SetTextSize(fSize);
-    lNums[iBinId] -> AddEntry(hNumRE[0][iBinId], "RE");
-    lNums[iBinId] -> AddEntry(hNumUE[0][iBinId][0], "UE[0]");
-    lNums[iBinId] -> AddEntry(hNumUE[0][iBinId][1], "UE[1]");
-    lNums[iBinId] -> AddEntry(hNumUE[0][iBinId][2], "UE[2]");
-
-  }
-  cout << "    Made labels." << endl;
-
-
   // make lines
   const UInt_t fLinLV(2);
   const UInt_t fLinLE(1);
   const UInt_t fSizLV(1);
   const UInt_t fSizLE(2);
-  const UInt_t fColLU(879);
-  const UInt_t fColLR[NBinsId] = {852, 892};
+  const UInt_t fColLU(872);
+  const UInt_t fColLR[NBinsId] = {852, 902};
 
   TLine *lAvgEtRE[NBinsId];
   TLine *lAvgEtUE[NBinsId];
@@ -983,6 +943,217 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
     lErrEtUE[iBinId][1] -> SetLineWidth(fSizLE);
   }
   cout << "    Made lines." << endl;
+
+
+  // make labels
+  const UInt_t  fColT(0);
+  const UInt_t  fFilT(0);
+  const UInt_t  fLinT(0);
+  const UInt_t  fAlign(12);
+  const UInt_t  nDec(3);
+  const Float_t xLeg[2]  = {0.3, 0.5};
+  const Float_t yLeg[2]  = {0.7, 0.9};
+  const Float_t xInfo[2] = {0.5, 0.7};
+  const Float_t yInfo[2] = {0.7, 0.9};
+  const Float_t xText[2] = {0.7, 0.9};
+  const Float_t yText[2] = {0.7, 0.9};
+  const TString sSystem("pp-collsions, #sqrt{s} = 200 GeV");
+  const TString sTrigger("E_{T}^{trg} #in (");
+  const TString sJet("anti-k_{T}, R = ");
+  const TString sChrg("#bf{charged jets}");
+  const TString sFull("#bf{full jets}");
+
+  TPaveText *pAvgEt[NBinsId];
+  TPaveText *pInfo[NBinsEt][NBinsId];
+  TPaveText *pAvgNums[NBinsEt][NBinsId];
+  TLegend   *lDeltaPhi[NBinsId];
+  TLegend   *lNums[NBinsId];
+  TLegend   *lAvg[NBinsId];
+  for (UInt_t iBinId = 0; iBinId < NBinsId; iBinId++) {
+
+    // average legend
+    lAvg[iBinId] = new TLegend(xLeg[0], yLeg[0], xLeg[1], yLeg[2]);
+    lAvg[iBinId] -> SetFillColor(fColT);
+    lAvg[iBinId] -> SetFillStyle(fFilT);
+    lAvg[iBinId] -> SetLineColor(fColT);
+    lAvg[iBinId] -> SetLineStyle(fLinT);
+    lAvg[iBinId] -> SetTextFont(fTxt);
+    lAvg[iBinId] -> AddEntry(hAvgRE[iBinId], "RE");
+    lAvg[iBinId] -> AddEntry(hAvgUE[iBinId][0], "UE");
+
+    // delta-phi legend
+    lDeltaPhi[iBinId] = new TLegend(xLeg[0], yLeg[0], xLeg[1], yLeg[1]);
+    lDeltaPhi[iBinId] -> SetFillColor(fColT);
+    lDeltaPhi[iBinId] -> SetFillStyle(fFilT);
+    lDeltaPhi[iBinId] -> SetLineColor(fColT);
+    lDeltaPhi[iBinId] -> SetLineStyle(fLinT);
+    lDeltaPhi[iBinId] -> SetTextFont(fTxt);
+    lDeltaPhi[iBinId] -> AddEntry(hDfJet[0][iBinId], "all jets");
+    lDeltaPhi[iBinId] -> AddEntry(hDfRE[0][iBinId], "RE");
+    lDeltaPhi[iBinId] -> AddEntry(hDfUE[0][iBinId][0], "UE[0]");
+    lDeltaPhi[iBinId] -> AddEntry(hDfUE[0][iBinId][1], "UE[1]");
+    lDeltaPhi[iBinId] -> AddEntry(hDfUE[0][iBinId][2], "UE[2]");
+
+    // number legend
+    lNums[iBinId] = new TLegend(xLeg[0], yLeg[0], xLeg[1], yLeg[1]);
+    lNums[iBinId] -> SetFillColor(fColT);
+    lNums[iBinId] -> SetFillStyle(fFilT);
+    lNums[iBinId] -> SetLineColor(fColT);
+    lNums[iBinId] -> SetLineStyle(fLinT);
+    lNums[iBinId] -> SetTextFont(fTxt);
+    lNums[iBinId] -> AddEntry(hNumRE[0][iBinId], "RE");
+    lNums[iBinId] -> AddEntry(hNumUE[0][iBinId][0], "UE[0]");
+    lNums[iBinId] -> AddEntry(hNumUE[0][iBinId][1], "UE[1]");
+    lNums[iBinId] -> AddEntry(hNumUE[0][iBinId][2], "UE[2]");
+
+
+    // average info
+    pAvgEt[iBinId] = new TPaveText(xInfo[0], yInfo[0], xInfo[1], yInfo[1], "NDC NB");
+    pAvgEt[iBinId] -> SetFillColor(fColT);
+    pAvgEt[iBinId] -> SetFillStyle(fFilT);
+    pAvgEt[iBinId] -> SetLineColor(fColT);
+    pAvgEt[iBinId] -> SetLineStyle(fLinT);
+    pAvgEt[iBinId] -> SetTextFont(fTxt);
+    pAvgEt[iBinId] -> SetTextAlign(fAlign);
+
+    TString sRAVraw("");
+    TString sUAVraw("");
+    TString sRAEraw("");
+    TString sUAEraw("");
+    TString sRAVtxt("");
+    TString sUAVtxt("");
+    TString sRAEtxt("");
+    TString sUAEtxt("");
+    sRAVraw += avgJetRE[0][iBinId];
+    sUAVraw += avgJetUE[0][iBinId][0];
+    sRAEraw += errJetRE[0][iBinId];
+    sUAEraw += errJetUE[0][iBinId][0];
+
+    const UInt_t nRAVraw = sRAVraw.First(".");
+    const UInt_t nUAVraw = sUAVraw.First(".");
+    const UInt_t nRAEraw = sRAEraw.First(".");
+    const UInt_t nUAEraw = sUAEraw.First(".");
+    const UInt_t nRAVtxt = (nRAVraw + nDec) + 1;
+    const UInt_t nUAVtxt = (nUAVraw + nDec) + 1;
+    const UInt_t nRAEtxt = (nRAEraw + nDec) + 1;
+    const UInt_t nUAEtxt = (nUAEraw + nDec) + 1;
+    sRAVtxt.Append(sRAVraw.Data(), nRAVtxt);
+    sUAVtxt.Append(sUAVraw.Data(), nUAVtxt);
+    sRAEtxt.Append(sRAEraw.Data(), nRAEtxt);
+    sUAEtxt.Append(sUAEraw.Data(), nUAEtxt);
+
+    TString sREavg("#color[");
+    TString sUEavg("#color[");
+    sREavg += fColLR[iBinId];
+    sREavg += "]{#LT#LTN^{jet}_{RE}#GT#GT = ";
+    sREavg += sRAVtxt.Data();
+    sREavg += " #pm ";
+    sREavg += sRAEtxt.Data();
+    sREavg += "}";
+    sUEavg += fColLU;
+    sUEavg += "]{#LT#LTN^{jet}_{UE}#GT#GT = ";
+    sUEavg += sUAVtxt.Data();
+    sUEavg += " #pm ";
+    sUEavg += sUAEtxt.Data();
+    sUEavg += "}";
+
+    TString sJetInfo(sJet.Data());
+    TString sJetType("");
+    sJetInfo += sRes.Data();
+    if (JetType == 0)
+      sJetType += sChrg.Data();
+    else
+      sJetType += sFull.Data();
+
+    pAvgEt[iBinId] -> AddText(sSystem.Data());
+    pAvgEt[iBinId] -> AddText(sJetInfo.Data());
+    pAvgEt[iBinId] -> AddText(sJetType.Data());
+    pAvgEt[iBinId] -> AddText(sREavg.Data());
+    pAvgEt[iBinId] -> AddText(sUEavg.Data());
+
+    for (UInt_t iBinEt = 0; iBinEt < NBinsEt; iBinEt++) {
+
+      // general info
+      TString sEtTrg(sTrigger.Data());
+      sEtTrg += eTtrgMin[iBinEt];
+      sEtTrg += ", ";
+      sEtTrg += eTtrgMax[iBinEt];
+      sEtTrg += ") GeV";
+
+      pInfo[iBinEt][iBinId] = new TPaveText(xInfo[0], yInfo[0], xInfo[1], yInfo[1], "NDC NB");
+      pInfo[iBinEt][iBinId] -> SetFillColor(fColT);
+      pInfo[iBinEt][iBinId] -> SetFillStyle(fFilT);
+      pInfo[iBinEt][iBinId] -> SetLineColor(fColT);
+      pInfo[iBinEt][iBinId] -> SetLineStyle(fLinT);
+      pInfo[iBinEt][iBinId] -> SetTextFont(fTxt);
+      pInfo[iBinEt][iBinId] -> SetTextAlign(fAlign);
+      pInfo[iBinEt][iBinId] -> AddText(sSystem.Data());
+      pInfo[iBinEt][iBinId] -> AddText(sEtTrg.Data());
+      pInfo[iBinEt][iBinId] -> AddText(sJetInfo.Data());
+      pInfo[iBinEt][iBinId] -> AddText(sJetType.Data());
+
+      // average no.s
+      pAvgNums[iBinEt][iBinId] = new TPaveText(xText[0], yText[0], xText[1], yText[1], "NDC NB");
+      pAvgNums[iBinEt][iBinId] -> SetFillColor(fColT);
+      pAvgNums[iBinEt][iBinId] -> SetFillStyle(fFilT);
+      pAvgNums[iBinEt][iBinId] -> SetLineColor(fColT);
+      pAvgNums[iBinEt][iBinId] -> SetLineStyle(fLinT);
+      pAvgNums[iBinEt][iBinId] -> SetTextFont(fTxt);
+      pAvgNums[iBinEt][iBinId] -> SetTextAlign(fAlign);
+
+      TString sRVraw("");
+      TString sREraw("");
+      TString sRVtxt("");
+      TString sREtxt("");
+      sRVraw += avgJetRE[iBinEt][iBinId];
+      sREraw += errJetRE[iBinEt][iBinId];
+
+      const UInt_t nRVraw = sRVraw.First(".");
+      const UInt_t nREraw = sREraw.First(".");
+      const UInt_t nRVtxt = (nRVraw + nDec) + 1;
+      const UInt_t nREtxt = (nREraw + nDec) + 1;
+      sRVtxt.Append(sRVraw.Data(), nRVtxt);
+      sREtxt.Append(sREraw.Data(), nREtxt);
+
+      TString sRavg("#color[");
+      sRavg += fColR[iBinId];
+      sRavg += "]{#LTN^{jet}_{RE}#GT = ";
+      sRavg += sRVtxt.Data();
+      sRavg += " #pm ";
+      sRavg += sREtxt.Data();
+      sRavg += "}";
+      pAvgNums[iBinEt][iBinId] -> AddText(sRavg.Data());
+      for (UInt_t iBinDf = 0; iBinDf < NBinsDf; iBinDf++) {
+
+        TString sUVraw("");
+        TString sUEraw("");
+        TString sUVtxt("");
+        TString sUEtxt("");
+        sUVraw += avgJetUE[iBinEt][iBinId][iBinDf];
+        sUEraw += avgJetUE[iBinEt][iBinId][iBinDf];
+
+        const UInt_t nUVraw = sUVraw.First(".");
+        const UInt_t nUEraw = sUEraw.First(".");
+        const UInt_t nUVtxt = (nUVraw + nDec) + 1;
+        const UInt_t nUEtxt = (nUEraw + nDec) + 1;
+        sUVtxt.Append(sUVraw.Data(), nUVtxt);
+        sUEtxt.Append(sUEraw.Data(), nUEtxt);
+
+        TString sUavg("#color[");
+        sUavg += fColU[iBinDf];
+        sUavg += "]{#LTN^{jet}_{UE}[";
+        sUavg += iBinDf;
+        sUavg += "]#GT = ";
+        sUavg += sUVtxt.Data();
+        sUavg += " #pm ";
+        sUavg += sUEtxt.Data();
+        sUavg += "}";
+        pAvgNums[iBinEt][iBinId] -> AddText(sUavg.Data());
+
+      }  // end dF loop
+    }  // end eTtrg loop
+  }  // end id loop
+  cout << "    Made labels." << endl;
 
 
   // create directories and save histograms
@@ -1086,6 +1257,8 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
   lAvgEtUE[0]    -> Draw();
   lErrEtUE[0][0] -> Draw();
   lErrEtUE[0][1] -> Draw();
+  lAvg[0]        -> Draw();
+  pAvgEt[0]      -> Draw();
   pAvgJets[1]    -> cd();
   hAvgRE[1]      -> Draw();
   hAvgUE[1][0]   -> Draw("same");
@@ -1095,6 +1268,8 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
   lAvgEtUE[1]    -> Draw();
   lErrEtUE[1][0] -> Draw();
   lErrEtUE[1][1] -> Draw();
+  lAvg[1]        -> Draw();
+  pAvgEt[1]      -> Draw();
   cAvgJets       -> Write();
   cAvgJets       -> Close();
 
@@ -1126,16 +1301,20 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
     for (UInt_t iBinDf = 0; iBinDf < NBinsDf; iBinDf++) {
       hDfUE[iBinEt][0][iBinDf] -> Draw("SAME LF HIST");
     }
-    lDeltaPhi[0]      -> Draw();
-    pDfJet[iBinEt][1] -> cd();
-    hDfJet[iBinEt][1] -> Draw();
-    hDfRE[iBinEt][1]  -> Draw("SAME LF HIST");
+    lDeltaPhi[0]        -> Draw();
+    pInfo[iBinEt][0]    -> Draw();
+    pAvgNums[iBinEt][0] -> Draw();
+    pDfJet[iBinEt][1]   -> cd();
+    hDfJet[iBinEt][1]   -> Draw();
+    hDfRE[iBinEt][1]    -> Draw("SAME LF HIST");
     for (UInt_t iBinDf = 0; iBinDf < NBinsDf; iBinDf++) {
       hDfUE[iBinEt][1][iBinDf] -> Draw("SAME LF HIST");
     }
-    lDeltaPhi[1]   -> Draw();
-    cDfJet[iBinEt] -> Write();
-    cDfJet[iBinEt] -> Close();
+    lDeltaPhi[1]        -> Draw();
+    pInfo[iBinEt][1]    -> Draw();
+    pAvgNums[iBinEt][1] -> Draw();
+    cDfJet[iBinEt]      -> Write();
+    cDfJet[iBinEt]      -> Close();
 
     // number plots
     dBinsEt[iBinEt] -> cd();
@@ -1164,15 +1343,19 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
     for (UInt_t iBinDf = 0; iBinDf < NBinsDf; iBinDf++) {
       hNumUE[iBinEt][0][iBinDf] -> Draw("same");
     }
-    lNums[0]           -> Draw();
-    pNumJet[iBinEt][1] -> cd();
-    hNumRE[iBinEt][1]  -> Draw();
+    lNums[0]            -> Draw();
+    pInfo[iBinEt][0]    -> Draw();
+    pAvgNums[iBinEt][0] -> Draw();
+    pNumJet[iBinEt][1]  -> cd();
+    hNumRE[iBinEt][1]   -> Draw();
     for (UInt_t iBinDf = 0; iBinDf < NBinsDf; iBinDf++) {
       hNumUE[iBinEt][1][iBinDf] -> Draw("same");
     }
-    lNums[1]        -> Draw();
-    cNumJet[iBinEt] -> Write();
-    cNumJet[iBinEt] -> Close();
+    lNums[1]            -> Draw();
+    pInfo[iBinEt][1]    -> Draw();
+    pAvgNums[iBinEt][1] -> Draw();
+    cNumJet[iBinEt]     -> Write();
+    cNumJet[iBinEt]     -> Close();
 
     // 2d number plots
     for (UInt_t iBinDf = 0; iBinDf < NBinsDf; iBinDf++) {
