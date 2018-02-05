@@ -46,7 +46,7 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
 
 
   // io parameters
-  const TString sOutput("pp200r9.purityExclusiveGamma.d1m2y2018.root");
+  const TString sOutput("pp200r9.purityInclusiveGamma.d1m2y2018.root");
   const TString sInput("input/pp200r9.merge.root");
 
   // event parameters
@@ -522,8 +522,8 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   const Double_t eTtrgMin[NBins] = {9., 9., 10., 11., 12., 13., 14., 15., 16., 17., 18., 19.};
   const Double_t eTtrgMax[NBins] = {20., 10., 11., 12., 13., 14., 15., 16., 17., 18., 19., 20.};
   const Double_t eTtrgBin[NBins] = {9., 10., 11., 12., 13., 14., 15., 16., 17., 18., 19., 20.};
-  const Double_t tspMin[NTrgs]   = {0., 0.2};
-  const Double_t tspMax[NTrgs]   = {0.08, 0.6};
+  const Double_t tspMin[NTrgs]   = {0., 0.};
+  const Double_t tspMax[NTrgs]   = {0.08, 100.};
 
   cout << "    Trigger bins:" << endl;
   for (UInt_t iBin = 0; iBin < NBins; iBin++) {
@@ -860,11 +860,13 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
 
       // reset visibility
       const Int_t kNotDraw = 1<<9;
-      hDeltaPhi[iBin][iTrg] -> GetFunction(sFunc.Data()) -> ResetBit(kNotDraw);
+      if (hDeltaPhi[iBin][iTrg] -> GetFunction(sFunc.Data())) {
+        hDeltaPhi[iBin][iTrg] -> GetFunction(sFunc.Data()) -> ResetBit(kNotDraw);
+      }
 
     }
   }
-  cout << "    Fit correlations..." << endl;
+  cout << "    Fit correlations." << endl;
   for (UInt_t iBin = 0; iBin < NBins; iBin++) {
     cout << "      Bin [" << iBin << "]: pi0 pedestal = " << pedestal[iBin][0]
          << ", gamma pedestal = " << pedestal[iBin][1]
@@ -958,7 +960,7 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   lAvgDown -> SetLineColor(fColR);
   lAvgDown -> SetLineStyle(fStyRE);
   lAvgDown -> SetLineWidth(fSizRE);
-  cout << "    Made R histogram..." << endl;
+  cout << "    Made R histogram." << endl;
 
 
   // set styles
@@ -973,6 +975,7 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   const Float_t fLab(0.03);
   const Float_t fOffsetX(1.);
   const Float_t dFrange[2] = {0., 1.03};
+  const Float_t rRange[2]  = {0., 1.};
   const TString sTitleX("#Delta#varphi^{trk} = #varphi^{trk} - #varphi^{trg}");
   const TString sTitleY("D^{NS}_{pp}");
   const TString sTitleXR("E_{T}^{trg} [GeV]");
@@ -1059,7 +1062,7 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
   hPurity -> GetYaxis() -> SetTitleFont(fTxt);
   hPurity -> GetYaxis() -> CenterTitle(fCnt);
   hPurity -> GetYaxis() -> SetLabelSize(fLab);
-  hPurity -> GetYaxis() -> SetRangeUser(0., 1.);
+  hPurity -> GetYaxis() -> SetRangeUser(rRange[0], rRange[1]);
   cout << "    Set styles." << endl;
 
 
@@ -1258,6 +1261,8 @@ void CalculatePurity(const Bool_t isInBatchMode=false) {
     TString sZtCanvasName(sZtCanvas.Data());
     sDfCanvasName += "et";
     sDfCanvasName += sEtNames[iBin].Data();
+    sZtCanvasName += "et";
+    sZtCanvasName += sEtNames[iBin].Data();
 
     // delta-phi plots
     dBin[iBin] -> cd();
