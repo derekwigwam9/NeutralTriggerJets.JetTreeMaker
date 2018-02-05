@@ -31,13 +31,12 @@ using namespace std;
 
 
 // global constants
-static const UInt_t NBinsEt = 4;
-static const UInt_t NBinsId = 2;
-static const UInt_t NBinsDf = 3;
-static const UInt_t NBinsPt = 35;
-static const UInt_t NPadsPt = 2;
-static const UInt_t NCones  = 2;
-static const UInt_t JetType = 1;
+static const UInt_t NBinsEt  = 4;
+static const UInt_t NBinsId  = 2;
+static const UInt_t NBinsPt  = 35;
+static const UInt_t NPadsPt  = 2;
+static const UInt_t NRegions = 2;
+static const UInt_t JetType  = 0;
 
 
 
@@ -47,7 +46,7 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   cout << "\n  Beginning gamma-pi0 ratio calculation..." << endl;
 
   // io parameters
-  const TString sOutput("pp200r9.etStudyScaledByBinWidth.eTtrg920.r03a02rm1chrg.d26m1y2018.root");
+  const TString sOutput("pp200r9.etStudyWithUE.eTtrg920.r03a02rm1chrg.d5m2y2018.root");
   const TString sInput("output/CollaborationMeetingJan2018/pp200r9.withOaCones.eTtrg920.r03rm1chrg.d21m1y2018.root");
   const TString sTree("JetTree");
 
@@ -57,10 +56,13 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   const Double_t gamTsp[2] = {0.2, 0.6};
 
   // jet parameters
+  const TString  sRes("0.3");
   const Double_t rJet(0.3);
   const Double_t aJetMin(0.2);
   const Double_t pTjetMin(0.2);
   const Double_t dFrecoil(TMath::PiOver4());
+  const Double_t dFdown[2] = {TMath::PiOver4(), TMath::PiOver2()};
+  const Double_t dFup[2]   = {(3. * TMath::PiOver2()), (7. * TMath::PiOver4())};
 
 
   // open files and grab tree
@@ -165,9 +167,11 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
 
   // define histograms
   TH1D *hPtRE[NBinsEt][NBinsId];
+  TH1D *hPtUE[NBinsEt][NBinsId];
 
   const UInt_t   nPt(NBinsPt - 1);
   const Double_t pTbin[NBinsPt] = {-5., -4., -3., -2., -1., 0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14., 15., 16., 17., 18., 19., 20., 22., 24., 26., 28., 30., 35., 40., 45., 50.};
+  // recoil distributions
   hPtRE[0][0]  = new TH1D("hPtRecoil_pi920", "", nPt, pTbin);
   hPtRE[0][1]  = new TH1D("hPtRecoil_ga920", "", nPt, pTbin);
   hPtRE[1][0]  = new TH1D("hPtRecoil_pi911", "", nPt, pTbin);
@@ -176,10 +180,20 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   hPtRE[2][1]  = new TH1D("hPtRecoil_ga1115", "", nPt, pTbin);
   hPtRE[3][0]  = new TH1D("hPtRecoil_pi1520", "", nPt, pTbin);
   hPtRE[3][1]  = new TH1D("hPtRecoil_ga1520", "", nPt, pTbin);
+  // off-axis distributions
+  hPtUE[0][0]  = new TH1D("hPtUncorrelated_pi920", "", nPt, pTbin);
+  hPtUE[0][1]  = new TH1D("hPtUncorrelated_ga920", "", nPt, pTbin);
+  hPtUE[1][0]  = new TH1D("hPtUncorrelated_pi911", "", nPt, pTbin);
+  hPtUE[1][1]  = new TH1D("hPtUncorrelated_ga911", "", nPt, pTbin);
+  hPtUE[2][0]  = new TH1D("hPtUncorrelated_pi1115", "", nPt, pTbin);
+  hPtUE[2][1]  = new TH1D("hPtUncorrelated_ga1115", "", nPt, pTbin);
+  hPtUE[3][0]  = new TH1D("hPtUncorrelated_pi1520", "", nPt, pTbin);
+  hPtUE[3][1]  = new TH1D("hPtUncorrelated_ga1520", "", nPt, pTbin);
   // errors
   for (UInt_t iBinEt = 0; iBinEt < NBinsEt; iBinEt++) {
     for (UInt_t iBinId = 0; iBinId < NBinsId; iBinId++) {
       hPtRE[iBinEt][iBinId] -> Sumw2();
+      hPtUE[iBinEt][iBinId] -> Sumw2();
     }
   }
   cout << "    Defined histograms." << endl;
@@ -264,7 +278,37 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
     }
 
 
-    // jet loop
+    // jet loop 1
+    Bool_t recoilJetIsPresent(false);
+    for (UInt_t iJet = 0; iJet < nJets; iJet++) {
+
+      // jet info
+      const Double_t fJet  = JetPhi  -> at(iJet);
+      const Double_t aJet  = JetArea -> at(iJet);
+      const Double_t pTjet = JetPt   -> at(iJet);
+
+      Double_t dFjet = fJet - fTrg;
+      if (dFjet < 0.)
+        dFjet += TMath::TwoPi();
+      if (dFjet > TMath::TwoPi())
+        dFjet -= TMath::TwoPi();
+
+      // jet cuts
+      const Bool_t isInAreaCut = (aJet > aJetMin);
+      const Bool_t isInPtCut   = (pTjet > pTjetMin);
+      const Bool_t isRecoil    = (TMath::Abs(dFjet - TMath::Pi()) < dFrecoil);
+      if (!isInAreaCut || !isInPtCut || !isRecoil) {
+        continue;
+      }
+      else {
+        recoilJetIsPresent = true;
+        break;
+      }
+
+    }  // end jet loop 1
+
+
+    // jet loop 2
     for (UInt_t iJet = 0; iJet < nJets; iJet++) {
 
       // jet info
@@ -292,13 +336,23 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
       if (!isInAreaCut || !isInPtCut) continue;
 
 
+      // recoil jets
       const Bool_t isRecoil = (TMath::Abs(dFjet - TMath::Pi()) < dFrecoil);
       if (isRecoil) {
-        hPtRE[0][idBin]           -> Fill(pTreco);
-        hPtRE[eTbin][idBin]       -> Fill(pTreco);
+        hPtRE[0][idBin]     -> Fill(pTreco);
+        hPtRE[eTbin][idBin] -> Fill(pTreco);
       }
 
-    }  // end jet loop
+      // off-axis jets
+      const Bool_t isInLowerCone = ((dFjet > dFdown[0]) && (dFjet < dFdown[1]));
+      const Bool_t isInUpperCone = ((dFjet > dFup[0]) && (dFjet < dFup[1]));
+      const Bool_t isInUeRegion  = (isInLowerCone || isInUpperCone);
+      if (isInUeRegion && recoilJetIsPresent) {
+        hPtUE[0][idBin]     -> Fill(pTreco);
+        hPtUE[eTbin][idBin] -> Fill(pTreco);
+      }
+
+    }  // end jet loop 2
 
   }  // end event loop
 
@@ -314,11 +368,15 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
     for (UInt_t iBinId = 0; iBinId < NBinsId; iBinId++) {
       const Double_t pTnorm = hBin * nTrgBin[iBinEt][iBinId];
       hPtRE[iBinEt][iBinId] -> Scale(1. / pTnorm);
+      hPtUE[iBinEt][iBinId] -> Scale(1. / pTnorm);
       for (UInt_t iBinPt = 1; iBinPt < NBinsPt + 1; iBinPt++) {
-        const Double_t pTwidth = hPtRE[iBinEt][iBinId] -> GetBinWidth(iBinPt);
-        const Double_t pTvalue = hPtRE[iBinEt][iBinId] -> GetBinContent(iBinPt);
-        const Double_t pTscale = pTvalue / pTwidth;
-        hPtRE[iBinEt][iBinId] -> SetBinContent(iBinPt, pTscale);
+        const Double_t pTwidth   = hPtRE[iBinEt][iBinId] -> GetBinWidth(iBinPt);
+        const Double_t pTvalueRE = hPtRE[iBinEt][iBinId] -> GetBinContent(iBinPt);
+        const Double_t pTvalueUE = hPtUE[iBinEt][iBinId] -> GetBinContent(iBinPt);
+        const Double_t pTscaleRE = pTvalueRE / pTwidth;
+        const Double_t pTscaleUE = pTvalueUE / pTwidth;
+        hPtRE[iBinEt][iBinId] -> SetBinContent(iBinPt, pTscaleRE);
+        hPtUE[iBinEt][iBinId] -> SetBinContent(iBinPt, pTscaleUE);
       }
     }
   }
@@ -328,16 +386,23 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   // calculate ratios
   const Double_t weight(1.);
   const TString  baseRE("hRatioRE_et");
+  const TString  baseUE("hRatioUE_et");
   const TString  eTname[NBinsEt] = {"920", "911", "1115", "1520"};
 
   TH1D *hRatioRE[NBinsEt];
+  TH1D *hRatioUE[NBinsEt];
   for (UInt_t iBinEt = 0; iBinEt < NBinsEt; iBinEt++) {
     TString sRatioRE(baseRE.Data());
+    TString sRatioUE(baseUE.Data());
     sRatioRE += eTname[iBinEt].Data();
+    sRatioUE += eTname[iBinEt].Data();
 
     hRatioRE[iBinEt] = new TH1D(sRatioRE.Data(), "", nPt, pTbin);
+    hRatioUE[iBinEt] = new TH1D(sRatioUE.Data(), "", nPt, pTbin);
     hRatioRE[iBinEt] -> Sumw2();
+    hRatioUE[iBinEt] -> Sumw2();
     hRatioRE[iBinEt] -> Divide(hPtRE[iBinEt][0], hPtRE[iBinEt][1], weight, weight);
+    hRatioUE[iBinEt] -> Divide(hPtUE[iBinEt][0], hPtUE[iBinEt][1], weight, weight);
   }
   cout << "    Calculated ratios." << endl;
 
@@ -345,10 +410,15 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   // set styles
   const UInt_t  fTxt(42);
   const UInt_t  fCnt(1);
-  const UInt_t  fColR(818);
-  const UInt_t  fMarR(20);
-  const UInt_t  fCol[NBinsId] = {858, 898};
-  const UInt_t  fMar[NBinsId] = {29, 20};
+  const UInt_t  fSiz(1.3);
+  const UInt_t  fColRR(819);
+  const UInt_t  fColRU(889);
+  const UInt_t  fMarRR(20);
+  const UInt_t  fMarRU(23);
+  const UInt_t  fColR[NBinsId] = {859, 899};
+  const UInt_t  fColU[NBinsId] = {809, 849};
+  const UInt_t  fMarR[NBinsId] = {29, 20};
+  const UInt_t  fMarU[NBinsId] = {22, 23};
   const Float_t fLab(0.03);
   const Float_t fLabR(0.055);
   const Float_t fSizR(0.074);
@@ -356,17 +426,20 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   const Float_t fOffsetXR(0.77);
   const Float_t fOffsetY(1.07);
   const Float_t fOffsetYR(0.57);
-  const Float_t fRangeY[2]  = {0.00007, 7.};
-  const Float_t fRangeYR[2] = {0.07, 17.};
+  const Float_t fRangeY[2]  = {0.00003, 1.3};
+  const Float_t fRangeYR[2] = {0.03, 13.};
   const TString sTitle("Recoil jet p_{T}^{reco}");
   const TString sTitleX("p_{T}^{reco} = p_{T}^{jet} - #rho #upoint A_{jet}");
-  const TString sTitleY("(1/N^{trg}) dN^{jet})/(dp_{T}^{jet} d#eta)");
+  const TString sTitleY("(1/N^{trg}) dN^{jet}/(dp_{T}^{jet} d#eta)");
   const TString sTitleR("#pi^{0} / #gamma^{rich}");
   for (UInt_t iBinEt = 0; iBinEt < NBinsEt; iBinEt++) {
     for (UInt_t iBinId = 0; iBinId < NBinsId; iBinId++) {
-      hPtRE[iBinEt][iBinId] -> SetLineColor(fCol[iBinId]);
-      hPtRE[iBinEt][iBinId] -> SetMarkerStyle(fMar[iBinId]);
-      hPtRE[iBinEt][iBinId] -> SetMarkerColor(fCol[iBinId]);
+
+      // recoil jets
+      hPtRE[iBinEt][iBinId] -> SetLineColor(fColR[iBinId]);
+      hPtRE[iBinEt][iBinId] -> SetMarkerStyle(fMarR[iBinId]);
+      hPtRE[iBinEt][iBinId] -> SetMarkerColor(fColR[iBinId]);
+      hPtRE[iBinEt][iBinId] -> SetMarkerSize(fSiz);
       hPtRE[iBinEt][iBinId] -> SetTitle(sTitle.Data());
       hPtRE[iBinEt][iBinId] -> SetTitleFont(fTxt);
       hPtRE[iBinEt][iBinId] -> GetXaxis() -> SetTitle(sTitleX.Data());
@@ -380,10 +453,33 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
       hPtRE[iBinEt][iBinId] -> GetYaxis() -> CenterTitle(fCnt);
       hPtRE[iBinEt][iBinId] -> GetYaxis() -> SetLabelSize(fLab);
       hPtRE[iBinEt][iBinId] -> GetYaxis() -> SetRangeUser(fRangeY[0], fRangeY[1]);
+
+      // off-axis jets
+      hPtUE[iBinEt][iBinId] -> SetLineColor(fColU[iBinId]);
+      hPtUE[iBinEt][iBinId] -> SetMarkerStyle(fMarU[iBinId]);
+      hPtUE[iBinEt][iBinId] -> SetMarkerColor(fColU[iBinId]);
+      hPtUE[iBinEt][iBinId] -> SetMarkerSize(fSiz);
+      hPtUE[iBinEt][iBinId] -> SetTitle(sTitle.Data());
+      hPtUE[iBinEt][iBinId] -> SetTitleFont(fTxt);
+      hPtUE[iBinEt][iBinId] -> GetXaxis() -> SetTitle(sTitleX.Data());
+      hPtUE[iBinEt][iBinId] -> GetXaxis() -> SetTitleFont(fTxt);
+      hPtUE[iBinEt][iBinId] -> GetXaxis() -> SetTitleOffset(fOffsetX);
+      hPtUE[iBinEt][iBinId] -> GetXaxis() -> CenterTitle(fCnt);
+      hPtUE[iBinEt][iBinId] -> GetXaxis() -> SetLabelSize(fLab);
+      hPtUE[iBinEt][iBinId] -> GetYaxis() -> SetTitle(sTitleY.Data());
+      hPtUE[iBinEt][iBinId] -> GetYaxis() -> SetTitleFont(fTxt);
+      hPtUE[iBinEt][iBinId] -> GetYaxis() -> SetTitleOffset(fOffsetY);
+      hPtUE[iBinEt][iBinId] -> GetYaxis() -> CenterTitle(fCnt);
+      hPtUE[iBinEt][iBinId] -> GetYaxis() -> SetLabelSize(fLab);
+      hPtUE[iBinEt][iBinId] -> GetYaxis() -> SetRangeUser(fRangeY[0], fRangeY[1]);
+
     }  // end id loop
-    hRatioRE[iBinEt] -> SetLineColor(fColR);
-    hRatioRE[iBinEt] -> SetMarkerStyle(fMarR);
-    hRatioRE[iBinEt] -> SetMarkerColor(fColR);
+
+    // recoil ratios
+    hRatioRE[iBinEt] -> SetLineColor(fColRR);
+    hRatioRE[iBinEt] -> SetMarkerStyle(fMarRR);
+    hRatioRE[iBinEt] -> SetMarkerColor(fColRR);
+    hRatioRE[iBinEt] -> SetMarkerSize(fSiz);
     hRatioRE[iBinEt] -> GetXaxis() -> SetTitle(sTitleX.Data());
     hRatioRE[iBinEt] -> GetXaxis() -> SetTitleFont(fTxt);
     hRatioRE[iBinEt] -> GetXaxis() -> SetTitleSize(fSizR);
@@ -397,6 +493,26 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
     hRatioRE[iBinEt] -> GetYaxis() -> CenterTitle(fCnt);
     hRatioRE[iBinEt] -> GetYaxis() -> SetLabelSize(fLabR);
     hRatioRE[iBinEt] -> GetYaxis() -> SetRangeUser(fRangeYR[0], fRangeYR[1]);
+
+    // off-axis ratios
+    hRatioUE[iBinEt] -> SetLineColor(fColRU);
+    hRatioUE[iBinEt] -> SetMarkerStyle(fMarRU);
+    hRatioUE[iBinEt] -> SetMarkerColor(fColRU);
+    hRatioUE[iBinEt] -> SetMarkerSize(fSiz);
+    hRatioUE[iBinEt] -> GetXaxis() -> SetTitle(sTitleX.Data());
+    hRatioUE[iBinEt] -> GetXaxis() -> SetTitleFont(fTxt);
+    hRatioUE[iBinEt] -> GetXaxis() -> SetTitleSize(fSizR);
+    hRatioUE[iBinEt] -> GetXaxis() -> SetTitleOffset(fOffsetXR);
+    hRatioUE[iBinEt] -> GetXaxis() -> CenterTitle(fCnt);
+    hRatioUE[iBinEt] -> GetXaxis() -> SetLabelSize(fLabR);
+    hRatioUE[iBinEt] -> GetYaxis() -> SetTitle(sTitleR.Data());
+    hRatioUE[iBinEt] -> GetYaxis() -> SetTitleFont(fTxt);
+    hRatioUE[iBinEt] -> GetYaxis() -> SetTitleSize(fSizR);
+    hRatioUE[iBinEt] -> GetYaxis() -> SetTitleOffset(fOffsetYR);
+    hRatioUE[iBinEt] -> GetYaxis() -> CenterTitle(fCnt);
+    hRatioUE[iBinEt] -> GetYaxis() -> SetLabelSize(fLabR);
+    hRatioUE[iBinEt] -> GetYaxis() -> SetRangeUser(fRangeYR[0], fRangeYR[1]);
+
   }  // end eTtrg loop
   cout << "    Set styles." << endl;
 
@@ -415,9 +531,12 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   const TString sJet("anti-k_{T}, R = ");
   const TString sChrg("#bf{charged jets}");
   const TString sFull("#bf{full jets}");
-  const TString sIdName[NBinsId] = {"#pi^{0}-jets", "#gamma^{rich}-jets"};
+  const TString sIdNameR[NBinsId] = {"#pi^{0}: recoil jets", "#gamma^{rich}: recoil jets"};
+  const TString sIdNameU[NBinsId] = {"#pi^{0}: off-axis jets", "#gamma^{rich}: off-axis jets"};
+  const TString sRatio[NRegions]  = {"recoil jets", "off-axis jets"};
 
-  TLegend   *lPtJet;
+  TLegend   *lPtJet[NBinsEt];
+  TLegend   *lRatio[NBinsEt];
   TPaveText *pPtTxt[NBinsEt];
   for (UInt_t iBinEt = 0; iBinEt < NBinsEt; iBinEt++) {
     TString sEtTrg(sTrigger.Data());
@@ -426,7 +545,7 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
     sEtTrg    += ", ";
     sEtTrg    += eTtrgMax[iBinEt];
     sEtTrg    += ") GeV";
-    sJetStuff += rJet;
+    sJetStuff += sRes.Data();
 
     pPtTxt[iBinEt] = new TPaveText(xyPav1, xyPav1, xyPav2, xyPav2, "NDC NB");
     pPtTxt[iBinEt] -> SetFillColor(fColT);
@@ -442,15 +561,27 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
       pPtTxt[iBinEt] -> AddText(sChrg.Data());
     else
       pPtTxt[iBinEt] -> AddText(sFull.Data());
-  }
-  lPtJet = new TLegend(xyLeg1, xyLeg1, xyLeg2, xyLeg2);
-  lPtJet -> SetFillColor(fColT);
-  lPtJet -> SetFillStyle(fFilT);
-  lPtJet -> SetLineColor(fColT);
-  lPtJet -> SetLineStyle(fLinT);
-  lPtJet -> SetTextFont(fTxt);
-  lPtJet -> AddEntry(hPtRE[0][0], sIdName[0].Data());
-  lPtJet -> AddEntry(hPtRE[0][1], sIdName[1].Data());
+
+    lPtJet[iBinEt] = new TLegend(xyLeg1, xyLeg1, xyLeg2, xyLeg2);
+    lPtJet[iBinEt] -> SetFillColor(fColT);
+    lPtJet[iBinEt] -> SetFillStyle(fFilT);
+    lPtJet[iBinEt] -> SetLineColor(fColT);
+    lPtJet[iBinEt] -> SetLineStyle(fLinT);
+    lPtJet[iBinEt] -> SetTextFont(fTxt);
+    lPtJet[iBinEt] -> AddEntry(hPtRE[0][0], sIdNameR[0].Data());
+    lPtJet[iBinEt] -> AddEntry(hPtUE[0][0], sIdNameU[0].Data());
+    lPtJet[iBinEt] -> AddEntry(hPtRE[0][1], sIdNameR[1].Data());
+    lPtJet[iBinEt] -> AddEntry(hPtUE[0][1], sIdNameU[1].Data());
+
+    lRatio[iBinEt] = new TLegend(xyLeg1, xyLeg1, xyLeg2, xyLeg2);
+    lRatio[iBinEt] -> SetFillColor(fColT);
+    lRatio[iBinEt] -> SetFillStyle(fFilT);
+    lRatio[iBinEt] -> SetLineColor(fColT);
+    lRatio[iBinEt] -> SetLineStyle(fLinT);
+    lRatio[iBinEt] -> SetTextFont(fTxt);
+    lRatio[iBinEt] -> AddEntry(hRatioRE[0], sRatio[0].Data());
+    lRatio[iBinEt] -> AddEntry(hRatioUE[0], sRatio[1].Data());
+  }  // end eTtrg loop
   cout << "    Made labels." << endl;
 
 
@@ -458,9 +589,12 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   const UInt_t fColL(1);
   const UInt_t fLinL(2);
 
-  TLine *lOne = new TLine(pTbin[0], 1., pTbin[NBinsPt - 1], 1.);
-  lOne -> SetLineColor(fColL);
-  lOne -> SetLineStyle(fLinL);
+  TLine *lOne[NBinsEt];
+  for (UInt_t iBinEt = 0; iBinEt < NBinsEt; iBinEt++) {
+    lOne[iBinEt] = new TLine(pTbin[0], 1., pTbin[NBinsPt - 1], 1.);
+    lOne[iBinEt] -> SetLineColor(fColL);
+    lOne[iBinEt] -> SetLineStyle(fLinL);
+  }
   cout << "    Made line." << endl;
 
 
@@ -472,8 +606,10 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
     dBinsEt[iBinEt] = (TDirectory*) fOutput -> mkdir(sBinsEt[iBinEt].Data());
     dBinsEt[iBinEt]  -> cd();
     hRatioRE[iBinEt] -> Write();
+    hRatioUE[iBinEt] -> Write();
     for (UInt_t iBinId = 0; iBinId < NBinsId; iBinId++) {
       hPtRE[iBinEt][iBinId] -> Write();
+      hPtUE[iBinEt][iBinId] -> Write();
     }  // end id loop
   }  // end eTtrg loop
   cout << "    Made directories." << endl;
@@ -495,13 +631,13 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   const Float_t marginBR(0.17);
   const Float_t xPadPt[NPadsPt + 2]  = {0., 1., 0., 1.};
   const Float_t yPadPt[NPadsPt + 2]  = {0., 0.35, 0.35, 1.};
-  const Float_t xPadRt[NBinsEt + 4]  = {0., 0.35, 0.35, 0.65, 0.65, 1., 0.65, 1.};
+  const Float_t xPadRt[NBinsEt + 4]  = {0., 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1.};
   const Float_t yPadRtR[NBinsEt + 4] = {0., 0.35, 0., 0.35, 0., 0.35, 0., 0.35};
   const Float_t yPadRtJ[NBinsEt + 4] = {0.35, 1., 0.35, 1., 0.35, 1., 0.35, 1.};
   const TString sPtCanvasR[NBinsEt]  = {"cPtRatio_et920", "cPtRatio_et911", "cPtRatio_et1115", "cPtRatio_et1520"};
   const TString sPtCanvasRT          = "cPtRatio_all";                                                             
   const TString sPtPads[NPadsPt]     = {"pRatio", "pJets"};                                                        
-  const TString sRtPadsR[NBinsEt]    = {"pRatio920", "pRatio911", "pRatio1115", "pRatio1520"};                                 
+  const TString sRtPadsR[NBinsEt]    = {"pRatio920", "pRatio911", "pRatio1115", "pRatio1520"};
   const TString sRtPadsJ[NBinsEt]    = {"pJets920", "pJets911", "pJets1115", "pJets1520"};                                 
 
   TPad    *pPtJet[NBinsEt][NPadsPt];
@@ -533,12 +669,16 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
     pPtJet[iBinEt][1] -> Draw();
     pPtJet[iBinEt][0] -> cd();
     hRatioRE[iBinEt]  -> Draw();
-    lOne              -> Draw();
+    hRatioUE[iBinEt]  -> Draw("same");
+    lOne[iBinEt]      -> Draw();
+    lRatio[iBinEt]    -> Draw();
     pPtJet[iBinEt][1] -> cd();
     hPtRE[iBinEt][1]  -> Draw();
-    hPtRE[iBinEt][0]  -> Draw();
+    hPtRE[iBinEt][0]  -> Draw("same");
+    hPtUE[iBinEt][1]  -> Draw("same");
+    hPtUE[iBinEt][0]  -> Draw("same");
     pPtTxt[iBinEt]    -> Draw();
-    lPtJet            -> Draw();
+    lPtJet[iBinEt]    -> Draw();
     cPtJet[iBinEt]    -> Write();
     cPtJet[iBinEt]    -> Close();
   }  // end eTtrg loop
@@ -550,8 +690,8 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   pRtJet[1][1] = new TPad(sRtPadsJ[1].Data(), "", xPadRt[2], yPadRtJ[2], xPadRt[3], yPadRtJ[3]);
   pRtJet[2][0] = new TPad(sRtPadsR[2].Data(), "", xPadRt[4], yPadRtR[4], xPadRt[5], yPadRtR[5]);
   pRtJet[2][1] = new TPad(sRtPadsJ[2].Data(), "", xPadRt[4], yPadRtJ[4], xPadRt[5], yPadRtJ[5]);
-  //pRtJet[3][0] = new TPad(sRtPadsR[3].Data(), "", xPadRt[6], yPadRtR[6], xPadRt[7], yPadRtR[7]);
-  //pRtJet[3][1] = new TPad(sRtPadsJ[3].Data(), "", xPadRt[6], yPadRtJ[6], xPadRt[7], yPadRtJ[7]);
+  pRtJet[3][0] = new TPad(sRtPadsR[3].Data(), "", xPadRt[6], yPadRtR[6], xPadRt[7], yPadRtR[7]);
+  pRtJet[3][1] = new TPad(sRtPadsJ[3].Data(), "", xPadRt[6], yPadRtJ[6], xPadRt[7], yPadRtJ[7]);
   pRtJet[0][0] -> SetGrid(grid, grid);
   pRtJet[0][0] -> SetLogy(log);
   pRtJet[0][0] -> SetFrameBorderMode(frame);
@@ -594,20 +734,20 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   pRtJet[2][1] -> SetLeftMargin(noMargin);
   pRtJet[2][1] -> SetTopMargin(marginT);
   pRtJet[2][1] -> SetBottomMargin(noMargin);
-  //pRtJet[3][0] -> SetGrid(grid, grid);
-  //pRtJet[3][0] -> SetLogy(log);
-  //pRtJet[3][0] -> SetFrameBorderMode(frame);
-  //pRtJet[3][0] -> SetRightMargin(marginR);
-  //pRtJet[3][0] -> SetLeftMargin(noMargin);
-  //pRtJet[3][0] -> SetTopMargin(noMargin);
-  //pRtJet[3][0] -> SetBottomMargin(marginBR);
-  //pRtJet[3][1] -> SetGrid(grid, grid);
-  //pRtJet[3][1] -> SetLogy(log);
-  //pRtJet[3][1] -> SetFrameBorderMode(frame);
-  //pRtJet[3][1] -> SetRightMargin(marginR);
-  //pRtJet[3][1] -> SetLeftMargin(noMargin);
-  //pRtJet[3][1] -> SetTopMargin(marginT);
-  //pRtJet[3][1] -> SetBottomMargin(noMargin);
+  pRtJet[3][0] -> SetGrid(grid, grid);
+  pRtJet[3][0] -> SetLogy(log);
+  pRtJet[3][0] -> SetFrameBorderMode(frame);
+  pRtJet[3][0] -> SetRightMargin(marginR);
+  pRtJet[3][0] -> SetLeftMargin(noMargin);
+  pRtJet[3][0] -> SetTopMargin(noMargin);
+  pRtJet[3][0] -> SetBottomMargin(marginBR);
+  pRtJet[3][1] -> SetGrid(grid, grid);
+  pRtJet[3][1] -> SetLogy(log);
+  pRtJet[3][1] -> SetFrameBorderMode(frame);
+  pRtJet[3][1] -> SetRightMargin(marginR);
+  pRtJet[3][1] -> SetLeftMargin(noMargin);
+  pRtJet[3][1] -> SetTopMargin(marginT);
+  pRtJet[3][1] -> SetBottomMargin(noMargin);
   cRtJet       -> cd();
   pRtJet[0][0] -> Draw();
   pRtJet[0][1] -> Draw();
@@ -615,40 +755,56 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   pRtJet[1][1] -> Draw();
   pRtJet[2][0] -> Draw();
   pRtJet[2][1] -> Draw();
-  //pRtJet[3][0] -> Draw();
-  //pRtJet[3][1] -> Draw();
+  pRtJet[3][0] -> Draw();
+  pRtJet[3][1] -> Draw();
   pRtJet[0][0] -> cd();
   hRatioRE[0]  -> Draw();
-  lOne         -> Draw();
+  hRatioUE[0]  -> Draw("same");
+  lOne[0]      -> Draw();
+  lRatio[1]    -> Draw();
   pRtJet[0][1] -> cd();
   hPtRE[0][1]  -> Draw();
   hPtRE[0][0]  -> Draw("same");
+  hPtUE[0][1]  -> Draw("same");
+  hPtUE[0][0]  -> Draw("same");
   pPtTxt[0]    -> Draw();
-  lPtJet       -> Draw();
+  lPtJet[0]    -> Draw();
   pRtJet[1][0] -> cd();
   hRatioRE[1]  -> Draw();
-  lOne         -> Draw();
+  hRatioUE[1]  -> Draw("same");
+  lOne[1]      -> Draw();
+  lRatio[1]    -> Draw();
   pRtJet[1][1] -> cd();
   hPtRE[1][1]  -> Draw();
   hPtRE[1][0]  -> Draw("same");
+  hPtUE[1][1]  -> Draw("same");
+  hPtUE[1][0]  -> Draw("same");
   pPtTxt[1]    -> Draw();
-  lPtJet       -> Draw();
+  lPtJet[1]    -> Draw();
   pRtJet[2][0] -> cd();
   hRatioRE[2]  -> Draw();
-  lOne         -> Draw();
+  hRatioUE[2]  -> Draw("same");
+  lOne[2]      -> Draw();
+  lRatio[2]    -> Draw();
   pRtJet[2][1] -> cd();
   hPtRE[2][1]  -> Draw();
   hPtRE[2][0]  -> Draw("same");
+  hPtUE[2][1]  -> Draw("same");
+  hPtUE[2][0]  -> Draw("same");
   pPtTxt[2]    -> Draw();
-  lPtJet       -> Draw();
-  //pRtJet[3][0] -> cd();
-  //hRatioRE[3]  -> Draw();
-  //lOne         -> Draw();
-  //pRtJet[3][1] -> cd();
-  //hPtRE[3][1]  -> Draw();
-  //hPtRE[3][0]  -> Draw("same");
-  //pPtTxt[2]    -> Draw();
-  //lPtJet       -> Draw();
+  lPtJet[2]    -> Draw();
+  pRtJet[3][0] -> cd();
+  hRatioRE[3]  -> Draw();
+  hRatioUE[3]  -> Draw("same");
+  lOne[3]      -> Draw();
+  lRatio[3]    -> Draw();
+  pRtJet[3][1] -> cd();
+  hPtRE[3][1]  -> Draw();
+  hPtRE[3][0]  -> Draw("same");
+  hPtUE[3][1]  -> Draw("same");
+  hPtUE[3][0]  -> Draw("same");
+  pPtTxt[3]    -> Draw();
+  lPtJet[3]    -> Draw();
   cRtJet       -> Write();
   cRtJet       -> Close();
   cout << "    Drew plots." << endl;
