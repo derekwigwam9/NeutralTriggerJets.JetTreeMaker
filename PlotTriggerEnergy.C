@@ -22,11 +22,11 @@ using namespace std;
 
 
 // io parameters
-static const TString sOutput("pp200r9.eTtrgAvgAny.d26m2y2018.root");
+static const TString sOutput("pp200r9.eTtrgAvg920.d26m2y2018.root");
 static const TString sInPi0("input/pp200r9.merge.root");
 static const TString sInGam("input/pp200r9.merge.root");
 static const TString sTree("Gfmtodst");
-static const Bool_t  doEtCut(false);
+static const Bool_t  doEtCut(true);
 
 
 
@@ -57,9 +57,9 @@ void PlotTriggerEnergy() {
 
 
   // make histograms
-  const UInt_t  nBins(50);
-  const Float_t bin1(6.);
-  const Float_t bin2(56.);
+  const UInt_t  nBins(16);
+  const Float_t bin1(7.);
+  const Float_t bin2(23.);
   const TString sPi0("hPi0");
   const TString sGam("hGam");
 
@@ -169,7 +169,7 @@ void PlotTriggerEnergy() {
   const UInt_t  fColL(0);
   const Float_t xyLeg[4] = {0.1, 0.1, 0.3, 0.3};
   const TString sLegP("#pi^{0}");
-  const TString sLegG("#gamma^{dir}");
+  const TString sLegG("#gamma^{rich}");
   TLegend *leg = new TLegend(xyLeg[0], xyLeg[1], xyLeg[2], xyLeg[3]);
   leg -> SetFillColor(fColL);
   leg -> SetLineColor(fColL);
@@ -185,7 +185,7 @@ void PlotTriggerEnergy() {
   const UInt_t  fAlign(12);
   const Float_t xyTxt[4] = {0.3, 0.1, 0.5, 0.3};
   const TString sSystem("pp-collisions, #sqrt{s} = 200 GeV");
-  const TString sData("Pythia 8");
+  const TString sData("Run 9 data");
   const TString sPiAvg("#LTE_{T}^{trg}#GT_{#pi} = ");
   const TString sGaAvg("#LTE_{T}^{trg}#GT_{#gamma} = ");
 
