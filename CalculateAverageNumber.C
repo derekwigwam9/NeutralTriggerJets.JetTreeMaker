@@ -433,9 +433,9 @@ void CalculateAverageNumber(const Bool_t isInBatchMode=false) {
     for (UInt_t iJet = 0; iJet < nJets; iJet++) {
 
       // jet info
-      const Double_t fJet    = JetPhi  -> at(iJet);
-      const Double_t aJet    = JetArea -> at(iJet);
-      const Double_t pTjet   = JetPt   -> at(iJet);
+      const Double_t fJet  = JetPhi  -> at(iJet);
+      const Double_t aJet  = JetArea -> at(iJet);
+      const Double_t pTjet = JetPt   -> at(iJet);
 
       Double_t dFjet = fJet - fTrg;
       if (dFjet < 0.)
