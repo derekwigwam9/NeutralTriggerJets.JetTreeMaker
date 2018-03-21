@@ -1,4 +1,4 @@
-// 'CalculateAverNumber.C'
+// 'CalculateAverageNumber.C'
 // Derek Anderson
 // 01.23.2018
 //
@@ -16,6 +16,7 @@
 
 
 #include <vector>
+#include <iostream>
 #include "TH1.h"
 #include "TH2.h"
 #include "TPad.h"
