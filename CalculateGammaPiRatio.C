@@ -46,7 +46,7 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   cout << "\n  Beginning gamma-pi0 ratio calculation..." << endl;
 
   // io parameters
-  const TString sOutput("pp200r9.etStudyWithUE.eTtrg920.r03a02rm1chrg.d5m2y2018.root");
+  const TString sOutput("pp200r9.withFitCutPlot.r03a02rm1chrg.d28m2y2018.root");
   const TString sInput("output/CollaborationMeetingJan2018/pp200r9.withOaCones.eTtrg920.r03rm1chrg.d21m1y2018.root");
   const TString sTree("JetTree");
 
@@ -94,7 +94,6 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   Double_t Sigma;
   Double_t Vz;
   // jet leaves
-  vector<Double_t> *JetEta;
   vector<Double_t> *JetPt;
   vector<Double_t> *JetNCons;
   vector<Double_t> *JetIndex;
@@ -428,7 +427,7 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   const Float_t fOffsetYR(0.57);
   const Float_t fRangeY[2]  = {0.00003, 1.3};
   const Float_t fRangeYR[2] = {0.03, 13.};
-  const TString sTitle("Recoil jet p_{T}^{reco}");
+  const TString sTitle("Recoil jet p_{T}^{reco}, no N_{fit} cut");
   const TString sTitleX("p_{T}^{reco} = p_{T}^{jet} - #rho #upoint A_{jet}");
   const TString sTitleY("(1/N^{trg}) dN^{jet}/(dp_{T}^{jet} d#eta)");
   const TString sTitleR("#pi^{0} / #gamma^{rich}");
@@ -622,6 +621,7 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   const UInt_t  heightRt(900);
   const UInt_t  frame(0);
   const UInt_t  grid(0);
+  const UInt_t  tick(1);
   const UInt_t  log(1);
   const Float_t noMargin(0.);
   const Float_t marginR(0.07);
@@ -651,6 +651,7 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
     pPtJet[iBinEt][0] = new TPad(sPtPads[0].Data(), "", xPadPt[0], yPadPt[0], xPadPt[1], yPadPt[1]);
     pPtJet[iBinEt][1] = new TPad(sPtPads[1].Data(), "", xPadPt[2], yPadPt[2], xPadPt[3], yPadPt[3]);
     pPtJet[iBinEt][0] -> SetGrid(grid, grid);
+    pPtJet[iBinEt][0] -> SetTicks(tick, tick);
     pPtJet[iBinEt][0] -> SetLogy(log);
     pPtJet[iBinEt][0] -> SetFrameBorderMode(frame);
     pPtJet[iBinEt][0] -> SetRightMargin(marginR);
@@ -658,6 +659,7 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
     pPtJet[iBinEt][0] -> SetTopMargin(noMargin);
     pPtJet[iBinEt][0] -> SetBottomMargin(marginBR);
     pPtJet[iBinEt][1] -> SetGrid(grid, grid);
+    pPtJet[iBinEt][1] -> SetTicks(tick, tick);
     pPtJet[iBinEt][1] -> SetLogy(log);
     pPtJet[iBinEt][1] -> SetFrameBorderMode(frame);
     pPtJet[iBinEt][1] -> SetRightMargin(marginR);
@@ -693,6 +695,7 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   pRtJet[3][0] = new TPad(sRtPadsR[3].Data(), "", xPadRt[6], yPadRtR[6], xPadRt[7], yPadRtR[7]);
   pRtJet[3][1] = new TPad(sRtPadsJ[3].Data(), "", xPadRt[6], yPadRtJ[6], xPadRt[7], yPadRtJ[7]);
   pRtJet[0][0] -> SetGrid(grid, grid);
+  pRtJet[0][0] -> SetTicks(tick, tick);
   pRtJet[0][0] -> SetLogy(log);
   pRtJet[0][0] -> SetFrameBorderMode(frame);
   pRtJet[0][0] -> SetRightMargin(noMargin);
@@ -700,6 +703,7 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   pRtJet[0][0] -> SetTopMargin(noMargin);
   pRtJet[0][0] -> SetBottomMargin(marginBR);
   pRtJet[0][1] -> SetGrid(grid, grid);
+  pRtJet[0][1] -> SetTicks(tick, tick);
   pRtJet[0][1] -> SetLogy(log);
   pRtJet[0][1] -> SetFrameBorderMode(frame);
   pRtJet[0][1] -> SetRightMargin(noMargin);
@@ -707,6 +711,7 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   pRtJet[0][1] -> SetTopMargin(marginT);
   pRtJet[0][1] -> SetBottomMargin(noMargin);
   pRtJet[1][0] -> SetGrid(grid, grid);
+  pRtJet[1][0] -> SetTicks(tick, tick);
   pRtJet[1][0] -> SetLogy(log);
   pRtJet[1][0] -> SetFrameBorderMode(frame);
   pRtJet[1][0] -> SetRightMargin(noMargin);
@@ -714,6 +719,7 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   pRtJet[1][0] -> SetTopMargin(noMargin);
   pRtJet[1][0] -> SetBottomMargin(marginBR);
   pRtJet[1][1] -> SetGrid(grid, grid);
+  pRtJet[1][1] -> SetTicks(tick, tick);
   pRtJet[1][1] -> SetLogy(log);
   pRtJet[1][1] -> SetFrameBorderMode(frame);
   pRtJet[1][1] -> SetRightMargin(noMargin);
@@ -721,20 +727,23 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   pRtJet[1][1] -> SetTopMargin(marginT);
   pRtJet[1][1] -> SetBottomMargin(noMargin);
   pRtJet[2][0] -> SetGrid(grid, grid);
+  pRtJet[2][0] -> SetTicks(tick, tick);
   pRtJet[2][0] -> SetLogy(log);
   pRtJet[2][0] -> SetFrameBorderMode(frame);
-  pRtJet[2][0] -> SetRightMargin(marginR);
+  pRtJet[2][0] -> SetRightMargin(noMargin);
   pRtJet[2][0] -> SetLeftMargin(noMargin);
   pRtJet[2][0] -> SetTopMargin(noMargin);
   pRtJet[2][0] -> SetBottomMargin(marginBR);
   pRtJet[2][1] -> SetGrid(grid, grid);
+  pRtJet[2][1] -> SetTicks(tick, tick);
   pRtJet[2][1] -> SetLogy(log);
   pRtJet[2][1] -> SetFrameBorderMode(frame);
-  pRtJet[2][1] -> SetRightMargin(marginR);
+  pRtJet[2][1] -> SetRightMargin(noMargin);
   pRtJet[2][1] -> SetLeftMargin(noMargin);
   pRtJet[2][1] -> SetTopMargin(marginT);
   pRtJet[2][1] -> SetBottomMargin(noMargin);
   pRtJet[3][0] -> SetGrid(grid, grid);
+  pRtJet[3][0] -> SetTicks(tick, tick);
   pRtJet[3][0] -> SetLogy(log);
   pRtJet[3][0] -> SetFrameBorderMode(frame);
   pRtJet[3][0] -> SetRightMargin(marginR);
@@ -742,6 +751,7 @@ void CalculateGammaPiRatio(const Bool_t isInBatchMode=false) {
   pRtJet[3][0] -> SetTopMargin(noMargin);
   pRtJet[3][0] -> SetBottomMargin(marginBR);
   pRtJet[3][1] -> SetGrid(grid, grid);
+  pRtJet[3][1] -> SetTicks(tick, tick);
   pRtJet[3][1] -> SetLogy(log);
   pRtJet[3][1] -> SetFrameBorderMode(frame);
   pRtJet[3][1] -> SetRightMargin(marginR);
