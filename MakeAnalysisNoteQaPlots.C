@@ -34,6 +34,7 @@ static const UInt_t NTrgCuts(9);
 static const UInt_t NTrgBins(4);
 static const UInt_t NTrkBins(4);
 static const UInt_t NTrgTsp(2);
+static const UInt_t NVtx(4);
 
 
 
@@ -957,10 +958,14 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   const UInt_t  fTxt(42);
   const UInt_t  fAln(12);
   const UInt_t  fCnt(1);
-  const UInt_t  fLab(0.04);
+  const Float_t fBar(0.6);
+  const Float_t fLab(0.04);
   const Float_t fTit(0.04);
-  const Float_t fOffX(1.);
+  const Float_t fOffX(1.1);
   const Float_t fOffY(1.3);
+  const Float_t fOffL(0.7);
+  const Float_t fOffB(0.2);
+  const TString sEvt("events");
   const TString sCount("counts");
   const TString sPrim("N^{primary}");
   const TString sTrgEt("E_{T}^{trg} [GeV]");
@@ -975,8 +980,72 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   const TString sTrkDf("#Delta#varphi^{trk}");
   const TString sTrkPtY("(1/N^{trg}) dN^{trk}/dp_{T}^{trk} [GeV/c]^{-1}");
   const TString sTrkDfY("(1/N^{trg}) dN^{trk}/d#Delta#varphi^{trk}");
-  const TString sVtx[4] = {"V_{x} [cm]", "V_{y} [cm]", "V_{z} [cm]", "V_{r} [cm]"};
+  const TString sVtx[NVtx]     = {"V_{x} [cm]", "V_{y} [cm]", "V_{z} [cm]", "V_{r} [cm]"};
+  const TString sCut[NTrgCuts] = {"no cuts", "bad runs removed", "V_{z}, V_{r} cuts", "bad towers removed", "e_{#eta}, e_{#varphi} cuts", "P_{proj} cut", "#eta^{trg} cut", "E_{T}^{trg} cut", "TSP cut"};
 
+  // event no's
+  hEvtNum -> SetLineColor(923);
+  hEvtNum -> SetLineStyle(1);
+  hEvtNum -> SetFillColor(923);
+  hEvtNum -> SetFillStyle(1001);
+  hEvtNum -> SetMarkerColor(923);
+  hEvtNum -> SetMarkerStyle(1);
+  hEvtNum -> SetBarWidth(fBar);
+  hEvtNum -> SetBarOffset(fOffB);
+  hEvtNum -> SetTitle("");
+  hEvtNum -> SetTitleFont(fTxt);
+  hEvtNum -> GetXaxis() -> SetTitle("");
+  hEvtNum -> GetXaxis() -> SetTitleFont(fTxt);
+  hEvtNum -> GetXaxis() -> SetTitleSize(fTit);
+  hEvtNum -> GetXaxis() -> SetTitleOffset(fOffX);
+  hEvtNum -> GetXaxis() -> SetLabelFont(fTxt);
+  hEvtNum -> GetXaxis() -> SetLabelSize(fLab);
+  hEvtNum -> GetXaxis() -> SetLabelOffset(fLab);
+  hEvtNum -> GetXaxis() -> CenterTitle(fCnt);
+  hEvtNum -> GetYaxis() -> SetTitle(sEvt.Data());
+  hEvtNum -> GetYaxis() -> SetTitleFont(fTxt);
+  hEvtNum -> GetYaxis() -> SetTitleSize(fTit);
+  hEvtNum -> GetYaxis() -> SetTitleOffset(fOffY);
+  hEvtNum -> GetYaxis() -> SetLabelFont(fTxt);
+  hEvtNum -> GetYaxis() -> SetLabelSize(fLab);
+  hEvtNum -> GetYaxis() -> CenterTitle(fCnt);
+  for (UInt_t iBin = 1; iBin < (NTrgCuts + 1); iBin++) {
+    hEvtNum -> GetXaxis() -> SetBinLabel(iBin, sCut[iBin - 1].Data());
+  }
+
+
+  // draw plots
+  const UInt_t width(750);
+  const UInt_t height(750);
+  const UInt_t fMode(0);
+  const UInt_t fBord(2);
+  const UInt_t fGrid(0);
+  const UInt_t fFrame(0);
+  const UInt_t fLogX(0);
+  const UInt_t fLogY(1);
+  const UInt_t fTick(1);
+  const Float_t fMarginL(0.15);
+  const Float_t fMarginR(0.05);
+  const Float_t fMarginT(0.05);
+  const Float_t fMarginB(0.15);
+
+  TCanvas *cEvtNum = new TCanvas("cEvtNum", "", width, height);
+  cEvtNum -> SetLogx(fLogX);
+  cEvtNum -> SetLogy(fLogY);
+  cEvtNum -> SetGrid(fGrid, fGrid);
+  cEvtNum -> SetTicks(fTick, fTick);
+  cEvtNum -> SetBorderMode(fMode);
+  cEvtNum -> SetBorderSize(fBord);
+  cEvtNum -> SetFrameBorderMode(fFrame);
+  cEvtNum -> SetLeftMargin(fMarginL);
+  cEvtNum -> SetTopMargin(fMarginT);
+  cEvtNum -> SetRightMargin(fMarginR);
+  cEvtNum -> SetBottomMargin(fMarginB);
+  cEvtNum -> cd();
+  hEvtNum -> Draw("B");
+  fOutput -> cd();
+  cEvtNum -> Write();
+  cEvtNum -> Close();
 
   // close files
   fOutput         -> cd();
