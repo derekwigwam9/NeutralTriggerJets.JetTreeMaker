@@ -517,8 +517,9 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
 
   // create histograms
   TH1D *hEvtNum;
-  TH1D *hEvtVz;
-  TH1D *hTrgEt;
+  TH1D *hEvtVz[2];
+  TH1D *hEvtVr[2];
+  TH1D *hTrgEt[2];
   TH1D *hTrgEta;
   TH1D *hTrgPhi;
   TH1D *hTrgTsp[NTrgTsp + 1];
@@ -560,7 +561,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   const Float_t prim[2] = {0., 100.};
   const Float_t et[2]   = {0., 50.};
   const Float_t eta[2]  = {-2., 2.};
-  const Float_t phi[2]  = {0., 6.3};
+  const Float_t phi[2]  = {-3.15, 3.15};
   const Float_t tsp[2]  = {0., 1.};
   const Float_t fit[2]  = {0., 50.};
   const Float_t rat[2]  = {0., 1.};
@@ -569,10 +570,13 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   const Float_t df[2]   = {-1.6, 4.7};
 
   hEvtNum         = new TH1D("hEvtNum", "", nNum, num[0], num[1]);
-  hEvtVz          = new TH1D("hEvtVz", "", nVz, vz[0], vz[1]);
-  hEvtVr          = new TH1D("hEvtVr", "", nVr, vr[0], vr[1]);
+  hEvtVz[0]       = new TH1D("hEvtVzAll", "", nVz, vz[0], vz[1]);
+  hEvtVz[1]       = new TH1D("hEvtVzCut", "", nVz, vz[0], vz[1]);
+  hEvtVr[0]       = new TH1D("hEvtVrAll", "", nVr, vr[0], vr[1]);
+  hEvtVr[1]       = new TH1D("hEvtVrCut", "", nVr, vr[0], vr[1]);
   hEvtPrim        = new TH1D("hEvtPrim", "", nPrim, prim[0], prim[1]);
-  hTrgEt          = new TH1D("hTrgEt", "", nEt, et[0], et[1]);
+  hTrgEt[0]       = new TH1D("hTrgEtAll", "", nEt, et[0], et[1]);
+  hTrgEt[1]       = new TH1D("hTrgEtCut", "", nEt, et[0], et[1]);
   hTrgEta         = new TH1D("hTrgEta", "", nEta, eta[0], eta[1]);
   hTrgPhi         = new TH1D("hTrgPhi", "", nPhi, phi[0], phi[1]);
   hTrgTsp[0]      = new TH1D("hTrgTspPi0", "", nTsp, tsp[0], tsp[1]);
@@ -610,10 +614,13 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkPtVsDf[1]   = new TH2D("hTrkPtVsDfGam", "", nDf, df[0], df[1], nPt3, pt[0], pt[1]);
   hTrkDfVsEta[0]  = new TH2D("hTrkDfVsEtaPi0", "", nEta, eta[0], eta[1], nDf, df[0], df[1]);
   hTrkDfVsEta[1]  = new TH2D("hTrkDfVsEtaGam", "", nEta, eta[0], eta[1], nDf, df[0], df[1]);
-  hEvtVz          -> Sumw2();
-  hEvtVr          -> Sumw2();
+  hEvtVz[0]       -> Sumw2();
+  hEvtVz[1]       -> Sumw2();
+  hEvtVr[0]       -> Sumw2();
+  hEvtVr[1]       -> Sumw2();
   hEvtPrim        -> Sumw2();
-  hTrgEt          -> Sumw2();
+  hTrgEt[0]       -> Sumw2();
+  hTrgEt[1]       -> Sumw2();
   hTrgEta         -> Sumw2();
   hTrgPhi         -> Sumw2();
   hTrgTsp[0]      -> Sumw2();
@@ -717,8 +724,8 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
 
 
     // fill event histograms
-    hEvtVz     -> Fill(zVtx);
-    hEvtVr     -> Fill(rVtx);
+    hEvtVz[0]  -> Fill(zVtx);
+    hEvtVr[0]  -> Fill(rVtx);
     hEvtPrim   -> Fill(nTrks);
     hEvtVyVsVx -> Fill(xVtx, yVtx);
     hEvtVxVsVz -> Fill(zVtx, xVtx);
@@ -729,8 +736,11 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
     const Bool_t isInZcut = (TMath::Abs(zVtx) < zVtxMax);
     if (isInRcut && isInZcut)
       nTrgCut[2]++;
-    else
+    else {
+      hEvtVz[1] -> Fill(zVtx);
+      hEvtVr[1] -> Fill(rVtx);
       continue;
+    }
 
 
     // trigger info
@@ -822,7 +832,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
     }
 
     // fill other histograms
-    hTrgEt -> Fill(eTtrg);
+    hTrgEt[0] -> Fill(eTtrg);
     if (isInTspCut) {
       hTrgEta      -> Fill(hPhys);
       hTrgPhi      -> Fill(fTrg);
@@ -830,8 +840,11 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
       hTrgEtVsPhi  -> Fill(fTrg, eTtrg);
       hTrgEtaVsPhi -> Fill(fTrg, hPhys);
     }
+
     if (isInEtCut)
       hTrgTsp[2] -> Fill(tspTrg);
+    else
+      hTrgEt[1] -> Fill(eTtrg);
 
     // leave only pi0 and gamma candidates
     if (!isInEtCut || !isInTspCut) continue;
@@ -955,6 +968,15 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
 
 
   // set styles
+  const UInt_t  fColAll(1);
+  const UInt_t  fColFil(0);
+  const UInt_t  fColCut(810);
+  const UInt_t  fLinAll(1);
+  const UInt_t  fLinCut(1);
+  const UInt_t  fFilAll(0);
+  const UInt_t  fFilCut(3472);
+  const UInt_t  fMarAll(8);
+  const UInt_t  fMarCut(8);
   const UInt_t  fTxt(42);
   const UInt_t  fAln(12);
   const UInt_t  fCnt(1);
@@ -963,7 +985,8 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   const Float_t fTit(0.04);
   const Float_t fOffX(1.1);
   const Float_t fOffY(1.3);
-  const Float_t fOffL(0.7);
+  const Float_t fOffZ(1.);
+  const Float_t fOffL(0.007);
   const Float_t fOffB(0.2);
   const TString sEvt("events");
   const TString sCount("counts");
@@ -984,11 +1007,11 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   const TString sCut[NTrgCuts] = {"no cuts", "bad runs removed", "V_{z}, V_{r} cuts", "bad towers removed", "e_{#eta}, e_{#varphi} cuts", "P_{proj} cut", "#eta^{trg} cut", "E_{T}^{trg} cut", "TSP cut"};
 
   // event no's
-  hEvtNum -> SetLineColor(923);
+  hEvtNum -> SetLineColor(883);
   hEvtNum -> SetLineStyle(1);
-  hEvtNum -> SetFillColor(923);
+  hEvtNum -> SetFillColor(883);
   hEvtNum -> SetFillStyle(1001);
-  hEvtNum -> SetMarkerColor(923);
+  hEvtNum -> SetMarkerColor(883);
   hEvtNum -> SetMarkerStyle(1);
   hEvtNum -> SetBarWidth(fBar);
   hEvtNum -> SetBarOffset(fOffB);
@@ -1000,7 +1023,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hEvtNum -> GetXaxis() -> SetTitleOffset(fOffX);
   hEvtNum -> GetXaxis() -> SetLabelFont(fTxt);
   hEvtNum -> GetXaxis() -> SetLabelSize(fLab);
-  hEvtNum -> GetXaxis() -> SetLabelOffset(fLab);
+  hEvtNum -> GetXaxis() -> SetLabelOffset(fOffL);
   hEvtNum -> GetXaxis() -> CenterTitle(fCnt);
   hEvtNum -> GetYaxis() -> SetTitle(sEvt.Data());
   hEvtNum -> GetYaxis() -> SetTitleFont(fTxt);
@@ -1013,22 +1036,299 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
     hEvtNum -> GetXaxis() -> SetBinLabel(iBin, sCut[iBin - 1].Data());
   }
 
+  // vertices
+  hEvtVz[0]  -> SetLineColor(fColAll);
+  hEvtVz[0]  -> SetLineStyle(fLinAll);
+  hEvtVz[0]  -> SetFillColor(fColFil);
+  hEvtVz[0]  -> SetFillStyle(fFilAll);
+  hEvtVz[0]  -> SetMarkerColor(fColAll);
+  hEvtVz[0]  -> SetMarkerStyle(fMarAll);
+  hEvtVz[0]  -> SetTitle("");
+  hEvtVz[0]  -> SetTitleFont(fTxt);
+  hEvtVz[0]  -> GetXaxis() -> SetTitle(sVtx[2].Data());
+  hEvtVz[0]  -> GetXaxis() -> SetTitleFont(fTxt);
+  hEvtVz[0]  -> GetXaxis() -> SetTitleSize(fTit);
+  hEvtVz[0]  -> GetXaxis() -> SetTitleOffset(fOffX);
+  hEvtVz[0]  -> GetXaxis() -> SetLabelFont(fTxt);
+  hEvtVz[0]  -> GetXaxis() -> SetLabelSize(fLab);
+  hEvtVz[0]  -> GetXaxis() -> CenterTitle(fCnt);
+  hEvtVz[0]  -> GetYaxis() -> SetTitle(sCount.Data());
+  hEvtVz[0]  -> GetYaxis() -> SetTitleFont(fTxt);
+  hEvtVz[0]  -> GetYaxis() -> SetTitleSize(fTit);
+  hEvtVz[0]  -> GetYaxis() -> SetTitleOffset(fOffY);
+  hEvtVz[0]  -> GetYaxis() -> SetLabelFont(fTxt);
+  hEvtVz[0]  -> GetYaxis() -> SetLabelSize(fLab);
+  hEvtVz[0]  -> GetYaxis() -> CenterTitle(fCnt);
+  hEvtVz[1]  -> SetLineColor(fColCut);
+  hEvtVz[1]  -> SetLineStyle(fLinCut);
+  hEvtVz[1]  -> SetFillColor(fColCut);
+  hEvtVz[1]  -> SetFillStyle(fFilCut);
+  hEvtVz[1]  -> SetMarkerColor(fColCut);
+  hEvtVz[1]  -> SetMarkerStyle(fMarCut);
+  hEvtVz[1]  -> SetTitle("");
+  hEvtVz[1]  -> SetTitleFont(fTxt);
+  hEvtVz[1]  -> GetXaxis() -> SetTitle(sVtx[2].Data());
+  hEvtVz[1]  -> GetXaxis() -> SetTitleFont(fTxt);
+  hEvtVz[1]  -> GetXaxis() -> SetTitleSize(fTit);
+  hEvtVz[1]  -> GetXaxis() -> SetTitleOffset(fOffX);
+  hEvtVz[1]  -> GetXaxis() -> SetLabelFont(fTxt);
+  hEvtVz[1]  -> GetXaxis() -> SetLabelSize(fLab);
+  hEvtVz[1]  -> GetXaxis() -> CenterTitle(fCnt);
+  hEvtVz[1]  -> GetYaxis() -> SetTitle(sCount.Data());
+  hEvtVz[1]  -> GetYaxis() -> SetTitleFont(fTxt);
+  hEvtVz[1]  -> GetYaxis() -> SetTitleSize(fTit);
+  hEvtVz[1]  -> GetYaxis() -> SetTitleOffset(fOffY);
+  hEvtVz[1]  -> GetYaxis() -> SetLabelFont(fTxt);
+  hEvtVz[1]  -> GetYaxis() -> SetLabelSize(fLab);
+  hEvtVz[1]  -> GetYaxis() -> CenterTitle(fCnt);
+  hEvtVr[0]  -> SetLineColor(fColAll);
+  hEvtVr[0]  -> SetLineStyle(fLinAll);
+  hEvtVr[0]  -> SetFillColor(fColFil);
+  hEvtVr[0]  -> SetFillStyle(fFilAll);
+  hEvtVr[0]  -> SetMarkerColor(fColAll);
+  hEvtVr[0]  -> SetMarkerStyle(fMarAll);
+  hEvtVr[0]  -> SetTitle("");
+  hEvtVr[0]  -> SetTitleFont(fTxt);
+  hEvtVr[0]  -> GetXaxis() -> SetTitle(sVtx[3].Data());
+  hEvtVr[0]  -> GetXaxis() -> SetTitleFont(fTxt);
+  hEvtVr[0]  -> GetXaxis() -> SetTitleSize(fTit);
+  hEvtVr[0]  -> GetXaxis() -> SetTitleOffset(fOffX);
+  hEvtVr[0]  -> GetXaxis() -> SetLabelFont(fTxt);
+  hEvtVr[0]  -> GetXaxis() -> SetLabelSize(fLab);
+  hEvtVr[0]  -> GetXaxis() -> CenterTitle(fCnt);
+  hEvtVr[0]  -> GetYaxis() -> SetTitle(sCount.Data());
+  hEvtVr[0]  -> GetYaxis() -> SetTitleFont(fTxt);
+  hEvtVr[0]  -> GetYaxis() -> SetTitleSize(fTit);
+  hEvtVr[0]  -> GetYaxis() -> SetTitleOffset(fOffY);
+  hEvtVr[0]  -> GetYaxis() -> SetLabelFont(fTxt);
+  hEvtVr[0]  -> GetYaxis() -> SetLabelSize(fLab);
+  hEvtVr[0]  -> GetYaxis() -> CenterTitle(fCnt);
+  hEvtVr[1]  -> SetLineColor(fColCut);
+  hEvtVr[1]  -> SetLineStyle(fLinCut);
+  hEvtVr[1]  -> SetFillColor(fColCut);
+  hEvtVr[1]  -> SetFillStyle(fFilCut);
+  hEvtVr[1]  -> SetMarkerColor(fColCut);
+  hEvtVr[1]  -> SetMarkerStyle(fMarCut);
+  hEvtVr[1]  -> SetTitle("");
+  hEvtVr[1]  -> SetTitleFont(fTxt);
+  hEvtVr[1]  -> GetXaxis() -> SetTitle(sVtx[3].Data());
+  hEvtVr[1]  -> GetXaxis() -> SetTitleFont(fTxt);
+  hEvtVr[1]  -> GetXaxis() -> SetTitleSize(fTit);
+  hEvtVr[1]  -> GetXaxis() -> SetTitleOffset(fOffX);
+  hEvtVr[1]  -> GetXaxis() -> SetLabelFont(fTxt);
+  hEvtVr[1]  -> GetXaxis() -> SetLabelSize(fLab);
+  hEvtVr[1]  -> GetXaxis() -> CenterTitle(fCnt);
+  hEvtVr[1]  -> GetYaxis() -> SetTitle(sCount.Data());
+  hEvtVr[1]  -> GetYaxis() -> SetTitleFont(fTxt);
+  hEvtVr[1]  -> GetYaxis() -> SetTitleSize(fTit);
+  hEvtVr[1]  -> GetYaxis() -> SetTitleOffset(fOffY);
+  hEvtVr[1]  -> GetYaxis() -> SetLabelFont(fTxt);
+  hEvtVr[1]  -> GetYaxis() -> SetLabelSize(fLab);
+  hEvtVr[1]  -> GetYaxis() -> CenterTitle(fCnt);
+  hEvtVyVsVx -> SetTitle("");
+  hEvtVyVsVx -> SetTitleFont(fTxt);
+  hEvtVyVsVx -> GetXaxis() -> SetTitle(sVtx[0].Data());
+  hEvtVyVsVx -> GetXaxis() -> SetTitleFont(fTxt);
+  hEvtVyVsVx -> GetXaxis() -> SetTitleSize(fTit);
+  hEvtVyVsVx -> GetXaxis() -> SetTitleOffset(fOffX);
+  hEvtVyVsVx -> GetXaxis() -> SetLabelFont(fTxt);
+  hEvtVyVsVx -> GetXaxis() -> SetLabelSize(fLab);
+  hEvtVyVsVx -> GetXaxis() -> CenterTitle(fCnt);
+  hEvtVyVsVx -> GetYaxis() -> SetTitle(sVtx[1].Data());
+  hEvtVyVsVx -> GetYaxis() -> SetTitleFont(fTxt);
+  hEvtVyVsVx -> GetYaxis() -> SetTitleSize(fTit);
+  hEvtVyVsVx -> GetYaxis() -> SetTitleOffset(fOffY);
+  hEvtVyVsVx -> GetYaxis() -> SetLabelFont(fTxt);
+  hEvtVyVsVx -> GetYaxis() -> SetLabelSize(fLab);
+  hEvtVyVsVx -> GetYaxis() -> CenterTitle(fCnt);
+  hEvtVyVsVx -> GetZaxis() -> SetTitle("");
+  hEvtVyVsVx -> GetZaxis() -> SetTitleFont(fTxt);
+  hEvtVyVsVx -> GetZaxis() -> SetTitleSize(fTit);
+  hEvtVyVsVx -> GetZaxis() -> SetTitleOffset(fOffZ);
+  hEvtVyVsVx -> GetZaxis() -> SetLabelFont(fTxt);
+  hEvtVyVsVx -> GetZaxis() -> SetLabelSize(fLab);
+  hEvtVyVsVx -> GetZaxis() -> CenterTitle(fCnt);
+  hEvtVxVsVz -> SetTitle("");
+  hEvtVxVsVz -> SetTitleFont(fTxt);
+  hEvtVxVsVz -> GetXaxis() -> SetTitle(sVtx[2].Data());
+  hEvtVxVsVz -> GetXaxis() -> SetTitleFont(fTxt);
+  hEvtVxVsVz -> GetXaxis() -> SetTitleSize(fTit);
+  hEvtVxVsVz -> GetXaxis() -> SetTitleOffset(fOffX);
+  hEvtVxVsVz -> GetXaxis() -> SetLabelFont(fTxt);
+  hEvtVxVsVz -> GetXaxis() -> SetLabelSize(fLab);
+  hEvtVxVsVz -> GetXaxis() -> CenterTitle(fCnt);
+  hEvtVxVsVz -> GetYaxis() -> SetTitle(sVtx[0].Data());
+  hEvtVxVsVz -> GetYaxis() -> SetTitleFont(fTxt);
+  hEvtVxVsVz -> GetYaxis() -> SetTitleSize(fTit);
+  hEvtVxVsVz -> GetYaxis() -> SetTitleOffset(fOffY);
+  hEvtVxVsVz -> GetYaxis() -> SetLabelFont(fTxt);
+  hEvtVxVsVz -> GetYaxis() -> SetLabelSize(fLab);
+  hEvtVxVsVz -> GetYaxis() -> CenterTitle(fCnt);
+  hEvtVxVsVz -> GetZaxis() -> SetTitle("");
+  hEvtVxVsVz -> GetZaxis() -> SetTitleFont(fTxt);
+  hEvtVxVsVz -> GetZaxis() -> SetTitleSize(fTit);
+  hEvtVxVsVz -> GetZaxis() -> SetTitleOffset(fOffZ);
+  hEvtVxVsVz -> GetZaxis() -> SetLabelFont(fTxt);
+  hEvtVxVsVz -> GetZaxis() -> SetLabelSize(fLab);
+  hEvtVxVsVz -> GetZaxis() -> CenterTitle(fCnt);
+  hEvtVyVsVz -> SetTitle("");
+  hEvtVyVsVz -> SetTitleFont(fTxt);
+  hEvtVyVsVz -> GetXaxis() -> SetTitle(sVtx[2].Data());
+  hEvtVyVsVz -> GetXaxis() -> SetTitleFont(fTxt);
+  hEvtVyVsVz -> GetXaxis() -> SetTitleSize(fTit);
+  hEvtVyVsVz -> GetXaxis() -> SetTitleOffset(fOffX);
+  hEvtVyVsVz -> GetXaxis() -> SetLabelFont(fTxt);
+  hEvtVyVsVz -> GetXaxis() -> SetLabelSize(fLab);
+  hEvtVyVsVz -> GetXaxis() -> CenterTitle(fCnt);
+  hEvtVyVsVz -> GetYaxis() -> SetTitle(sVtx[1].Data());
+  hEvtVyVsVz -> GetYaxis() -> SetTitleFont(fTxt);
+  hEvtVyVsVz -> GetYaxis() -> SetTitleSize(fTit);
+  hEvtVyVsVz -> GetYaxis() -> SetTitleOffset(fOffY);
+  hEvtVyVsVz -> GetYaxis() -> SetLabelFont(fTxt);
+  hEvtVyVsVz -> GetYaxis() -> SetLabelSize(fLab);
+  hEvtVyVsVz -> GetYaxis() -> CenterTitle(fCnt);
+  hEvtVyVsVz -> GetZaxis() -> SetTitle("");
+  hEvtVyVsVz -> GetZaxis() -> SetTitleFont(fTxt);
+  hEvtVyVsVz -> GetZaxis() -> SetTitleSize(fTit);
+  hEvtVyVsVz -> GetZaxis() -> SetTitleOffset(fOffZ);
+  hEvtVyVsVz -> GetZaxis() -> SetLabelFont(fTxt);
+  hEvtVyVsVz -> GetZaxis() -> SetLabelSize(fLab);
+  hEvtVyVsVz -> GetZaxis() -> CenterTitle(fCnt);
+
+  // no. of tracks
+  hEvtPrim -> SetLineColor(fColAll);
+  hEvtPrim -> SetLineStyle(fLinAll);
+  hEvtPrim -> SetFillColor(fColFil);
+  hEvtPrim -> SetFillStyle(fFilAll);
+  hEvtPrim -> SetMarkerColor(fColAll);
+  hEvtPrim -> SetMarkerStyle(fMarAll);
+  hEvtPrim -> SetTitle("");
+  hEvtPrim -> SetTitleFont(fTxt);
+  hEvtPrim -> GetXaxis() -> SetTitle(sPrim.Data());
+  hEvtPrim -> GetXaxis() -> SetTitleFont(fTxt);
+  hEvtPrim -> GetXaxis() -> SetTitleSize(fTit);
+  hEvtPrim -> GetXaxis() -> SetTitleOffset(fOffX);
+  hEvtPrim -> GetXaxis() -> SetLabelFont(fTxt);
+  hEvtPrim -> GetXaxis() -> SetLabelSize(fLab);
+  hEvtPrim -> GetXaxis() -> CenterTitle(fCnt);
+  hEvtPrim -> GetYaxis() -> SetTitle(sCount.Data());
+  hEvtPrim -> GetYaxis() -> SetTitleFont(fTxt);
+  hEvtPrim -> GetYaxis() -> SetTitleSize(fTit);
+  hEvtPrim -> GetYaxis() -> SetTitleOffset(fOffY);
+  hEvtPrim -> GetYaxis() -> SetLabelFont(fTxt);
+  hEvtPrim -> GetYaxis() -> SetLabelSize(fLab);
+  hEvtPrim -> GetYaxis() -> CenterTitle(fCnt);
+
+  // eTtrg (no tsp cuts)
+  hTrgEt[0]   -> SetLineColor(fColAll);
+  hTrgEt[0]   -> SetLineStyle(fLinAll);
+  hTrgEt[0]   -> SetFillColor(fColFil);
+  hTrgEt[0]   -> SetFillStyle(fFilAll);
+  hTrgEt[0]   -> SetMarkerColor(fColAll);
+  hTrgEt[0]   -> SetMarkerStyle(fMarAll);
+  hTrgEt[0]   -> SetTitle("");
+  hTrgEt[0]   -> SetTitleFont(fTxt);
+  hTrgEt[0]   -> GetXaxis() -> SetTitle(sTrgEt.Data());
+  hTrgEt[0]   -> GetXaxis() -> SetTitleFont(fTxt);
+  hTrgEt[0]   -> GetXaxis() -> SetTitleSize(fTit);
+  hTrgEt[0]   -> GetXaxis() -> SetTitleOffset(fOffX);
+  hTrgEt[0]   -> GetXaxis() -> SetLabelFont(fTxt);
+  hTrgEt[0]   -> GetXaxis() -> SetLabelSize(fLab);
+  hTrgEt[0]   -> GetXaxis() -> CenterTitle(fCnt);
+  hTrgEt[0]   -> GetYaxis() -> SetTitle(sCount.Data());
+  hTrgEt[0]   -> GetYaxis() -> SetTitleFont(fTxt);
+  hTrgEt[0]   -> GetYaxis() -> SetTitleSize(fTit);
+  hTrgEt[0]   -> GetYaxis() -> SetTitleOffset(fOffY);
+  hTrgEt[0]   -> GetYaxis() -> SetLabelFont(fTxt);
+  hTrgEt[0]   -> GetYaxis() -> SetLabelSize(fLab);
+  hTrgEt[0]   -> GetYaxis() -> CenterTitle(fCnt);
+  hTrgEt[1]   -> SetLineColor(fColCut);
+  hTrgEt[1]   -> SetLineStyle(fLinCut);
+  hTrgEt[1]   -> SetFillColor(fColCut);
+  hTrgEt[1]   -> SetFillStyle(fFilCut);
+  hTrgEt[1]   -> SetMarkerColor(fColCut);
+  hTrgEt[1]   -> SetMarkerStyle(fMarCut);
+  hTrgEt[1]   -> SetTitle("");
+  hTrgEt[1]   -> SetTitleFont(fTxt);
+  hTrgEt[1]   -> GetXaxis() -> SetTitle(sTrgEt.Data());
+  hTrgEt[1]   -> GetXaxis() -> SetTitleFont(fTxt);
+  hTrgEt[1]   -> GetXaxis() -> SetTitleSize(fTit);
+  hTrgEt[1]   -> GetXaxis() -> SetTitleOffset(fOffX);
+  hTrgEt[1]   -> GetXaxis() -> SetLabelFont(fTxt);
+  hTrgEt[1]   -> GetXaxis() -> SetLabelSize(fLab);
+  hTrgEt[1]   -> GetXaxis() -> CenterTitle(fCnt);
+  hTrgEt[1]   -> GetYaxis() -> SetTitle(sCount.Data());
+  hTrgEt[1]   -> GetYaxis() -> SetTitleFont(fTxt);
+  hTrgEt[1]   -> GetYaxis() -> SetTitleSize(fTit);
+  hTrgEt[1]   -> GetYaxis() -> SetTitleOffset(fOffY);
+  hTrgEt[1]   -> GetYaxis() -> SetLabelFont(fTxt);
+  hTrgEt[1]   -> GetYaxis() -> SetLabelSize(fLab);
+  hTrgEt[1]   -> GetYaxis() -> CenterTitle(fCnt);
+  hTrgEtVsEta -> SetTitle("");
+  hTrgEtVsEta -> SetTitleFont(fTxt);
+  hTrgEtVsEta -> GetXaxis() -> SetTitle(sTrgEta.Data());
+  hTrgEtVsEta -> GetXaxis() -> SetTitleFont(fTxt);
+  hTrgEtVsEta -> GetXaxis() -> SetTitleSize(fTit);
+  hTrgEtVsEta -> GetXaxis() -> SetTitleOffset(fOffX);
+  hTrgEtVsEta -> GetXaxis() -> SetLabelFont(fTxt);
+  hTrgEtVsEta -> GetXaxis() -> SetLabelSize(fLab);
+  hTrgEtVsEta -> GetXaxis() -> CenterTitle(fCnt);
+  hTrgEtVsEta -> GetYaxis() -> SetTitle(sTrgEt.Data());
+  hTrgEtVsEta -> GetYaxis() -> SetTitleFont(fTxt);
+  hTrgEtVsEta -> GetYaxis() -> SetTitleSize(fTit);
+  hTrgEtVsEta -> GetYaxis() -> SetTitleOffset(fOffY);
+  hTrgEtVsEta -> GetYaxis() -> SetLabelFont(fTxt);
+  hTrgEtVsEta -> GetYaxis() -> SetLabelSize(fLab);
+  hTrgEtVsEta -> GetYaxis() -> CenterTitle(fCnt);
+  hTrgEtVsEta -> GetZaxis() -> SetTitle("");
+  hTrgEtVsEta -> GetZaxis() -> SetTitleFont(fTxt);
+  hTrgEtVsEta -> GetZaxis() -> SetTitleSize(fTit);
+  hTrgEtVsEta -> GetZaxis() -> SetTitleOffset(fOffZ);
+  hTrgEtVsEta -> GetZaxis() -> SetLabelFont(fTxt);
+  hTrgEtVsEta -> GetZaxis() -> SetLabelSize(fLab);
+  hTrgEtVsEta -> GetZaxis() -> CenterTitle(fCnt);
+  hTrgEtVsPhi -> SetTitle("");
+  hTrgEtVsPhi -> SetTitleFont(fTxt);
+  hTrgEtVsPhi -> GetXaxis() -> SetTitle(sTrgPhi.Data());
+  hTrgEtVsPhi -> GetXaxis() -> SetTitleFont(fTxt);
+  hTrgEtVsPhi -> GetXaxis() -> SetTitleSize(fTit);
+  hTrgEtVsPhi -> GetXaxis() -> SetTitleOffset(fOffX);
+  hTrgEtVsPhi -> GetXaxis() -> SetLabelFont(fTxt);
+  hTrgEtVsPhi -> GetXaxis() -> SetLabelSize(fLab);
+  hTrgEtVsPhi -> GetXaxis() -> CenterTitle(fCnt);
+  hTrgEtVsPhi -> GetYaxis() -> SetTitle(sTrgEt.Data());
+  hTrgEtVsPhi -> GetYaxis() -> SetTitleFont(fTxt);
+  hTrgEtVsPhi -> GetYaxis() -> SetTitleSize(fTit);
+  hTrgEtVsPhi -> GetYaxis() -> SetTitleOffset(fOffY);
+  hTrgEtVsPhi -> GetYaxis() -> SetLabelFont(fTxt);
+  hTrgEtVsPhi -> GetYaxis() -> SetLabelSize(fLab);
+  hTrgEtVsPhi -> GetYaxis() -> CenterTitle(fCnt);
+  hTrgEtVsPhi -> GetZaxis() -> SetTitle("");
+  hTrgEtVsPhi -> GetZaxis() -> SetTitleFont(fTxt);
+  hTrgEtVsPhi -> GetZaxis() -> SetTitleSize(fTit);
+  hTrgEtVsPhi -> GetZaxis() -> SetTitleOffset(fOffZ);
+  hTrgEtVsPhi -> GetZaxis() -> SetLabelFont(fTxt);
+  hTrgEtVsPhi -> GetZaxis() -> SetLabelSize(fLab);
+  hTrgEtVsPhi -> GetZaxis() -> CenterTitle(fCnt);
+
 
   // draw plots
-  const UInt_t width(750);
-  const UInt_t height(750);
-  const UInt_t fMode(0);
-  const UInt_t fBord(2);
-  const UInt_t fGrid(0);
-  const UInt_t fFrame(0);
-  const UInt_t fLogX(0);
-  const UInt_t fLogY(1);
-  const UInt_t fTick(1);
-  const Float_t fMarginL(0.15);
-  const Float_t fMarginR(0.05);
-  const Float_t fMarginT(0.05);
-  const Float_t fMarginB(0.15);
+  const UInt_t  width(750);
+  const UInt_t  bigWidth(1500);
+  const UInt_t  height(750);
+  const UInt_t  fMode(0);
+  const UInt_t  fBord(2);
+  const UInt_t  fGrid(0);
+  const UInt_t  fFrame(0);
+  const UInt_t  fLogX(0);
+  const UInt_t  fLogY(1);
+  const UInt_t  fLogY2(0);
+  const UInt_t  fLogZ(1);
+  const UInt_t  fTick(1);
+  const Float_t fMarginBig(0.15);
+  const Float_t fMarginSmall(0.05);
 
+  // evt no's
   TCanvas *cEvtNum = new TCanvas("cEvtNum", "", width, height);
   cEvtNum -> SetLogx(fLogX);
   cEvtNum -> SetLogy(fLogY);
@@ -1037,23 +1337,178 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   cEvtNum -> SetBorderMode(fMode);
   cEvtNum -> SetBorderSize(fBord);
   cEvtNum -> SetFrameBorderMode(fFrame);
-  cEvtNum -> SetLeftMargin(fMarginL);
-  cEvtNum -> SetTopMargin(fMarginT);
-  cEvtNum -> SetRightMargin(fMarginR);
-  cEvtNum -> SetBottomMargin(fMarginB);
+  cEvtNum -> SetLeftMargin(fMarginBig);
+  cEvtNum -> SetTopMargin(fMarginSmall);
+  cEvtNum -> SetRightMargin(fMarginSmall);
+  cEvtNum -> SetBottomMargin(fMarginBig);
   cEvtNum -> cd();
   hEvtNum -> Draw("B");
   fOutput -> cd();
   cEvtNum -> Write();
   cEvtNum -> Close();
 
+  // vertices
+  TCanvas *cEvtVz = new TCanvas("cEvtVz", "", width, height);
+  cEvtVz    -> SetLogx(fLogX);
+  cEvtVz    -> SetLogy(fLogY);
+  cEvtVz    -> SetGrid(fGrid, fGrid);
+  cEvtVz    -> SetTicks(fTick, fTick);
+  cEvtVz    -> SetBorderMode(fMode);
+  cEvtVz    -> SetBorderSize(fBord);
+  cEvtVz    -> SetFrameBorderMode(fFrame);
+  cEvtVz    -> SetLeftMargin(fMarginBig);
+  cEvtVz    -> SetTopMargin(fMarginSmall);
+  cEvtVz    -> SetRightMargin(fMarginSmall);
+  cEvtVz    -> SetBottomMargin(fMarginBig);
+  cEvtVz    -> cd();
+  hEvtVz[0] -> Draw("");
+  hEvtVz[1] -> Draw("hist same");
+  hEvtVz[1] -> Draw("same");
+  cEvtVz    -> Write();
+  cEvtVz    -> Close();
+
+  TCanvas *cEvtVyVxVsVz = new TCanvas("cEvtVyVxVsVz", "", bigWidth, height);
+  TPad    *pEvtVxVsVz   = new TPad("pEvtVxVsVz", "", 0., 0., 0.5, 1.);
+  TPad    *pEvtVyVsVz   = new TPad("pEvtVyVsVz", "", 0.5, 0., 1., 1.);
+  pEvtVxVsVz   -> SetLogx(fLogX);
+  pEvtVxVsVz   -> SetLogy(fLogY2);
+  pEvtVxVsVz   -> SetLogz(fLogZ);
+  pEvtVxVsVz   -> SetGrid(fGrid, fGrid);
+  pEvtVxVsVz   -> SetTicks(fTick, fTick);
+  pEvtVxVsVz   -> SetBorderMode(fMode);
+  pEvtVxVsVz   -> SetBorderSize(fBord);
+  pEvtVxVsVz   -> SetFrameBorderMode(fFrame);
+  pEvtVxVsVz   -> SetLeftMargin(fMarginBig);
+  pEvtVxVsVz   -> SetTopMargin(fMarginSmall);
+  pEvtVxVsVz   -> SetRightMargin(fMarginBig);
+  pEvtVxVsVz   -> SetBottomMargin(fMarginBig);
+  pEvtVyVsVz   -> SetLogx(fLogX);
+  pEvtVyVsVz   -> SetLogy(fLogY2);
+  pEvtVyVsVz   -> SetLogz(fLogZ);
+  pEvtVyVsVz   -> SetGrid(fGrid, fGrid);
+  pEvtVyVsVz   -> SetTicks(fTick, fTick);
+  pEvtVyVsVz   -> SetBorderMode(fMode);
+  pEvtVyVsVz   -> SetBorderSize(fBord);
+  pEvtVyVsVz   -> SetFrameBorderMode(fFrame);
+  pEvtVyVsVz   -> SetLeftMargin(fMarginBig);
+  pEvtVyVsVz   -> SetTopMargin(fMarginSmall);
+  pEvtVyVsVz   -> SetRightMargin(fMarginBig);
+  pEvtVyVsVz   -> SetBottomMargin(fMarginBig);
+  cEvtVyVxVsVz -> cd();
+  pEvtVxVsVz   -> Draw();
+  pEvtVyVsVz   -> Draw();
+  pEvtVxVsVz   -> cd();
+  hEvtVxVsVz   -> Draw("colz");
+  pEvtVyVsVz   -> cd();
+  hEvtVyVsVz   -> Draw("colz");
+  cEvtVyVxVsVz -> Write();
+  cEvtVyVxVsVz -> Close();
+
+  TCanvas *cEvtVyVsVx = new TCanvas("cEvtVyVsVx", "", width, height);
+  cEvtVyVsVx -> SetLogx(fLogX);
+  cEvtVyVsVx -> SetLogy(fLogY2);
+  cEvtVyVsVx -> SetLogz(fLogZ);
+  cEvtVyVsVx -> SetGrid(fGrid, fGrid);
+  cEvtVyVsVx -> SetTicks(fTick, fTick);
+  cEvtVyVsVx -> SetBorderMode(fMode);
+  cEvtVyVsVx -> SetBorderSize(fBord);
+  cEvtVyVsVx -> SetFrameBorderMode(fFrame);
+  cEvtVyVsVx -> SetLeftMargin(fMarginBig);
+  cEvtVyVsVx -> SetTopMargin(fMarginSmall);
+  cEvtVyVsVx -> SetRightMargin(fMarginBig);
+  cEvtVyVsVx -> SetBottomMargin(fMarginBig);
+  cEvtVyVsVx -> cd();
+  hEvtVyVsVx -> Draw("colz");
+  cEvtVyVsVx -> Write();
+  cEvtVyVsVx -> Close();
+
+  // no. of tracks
+  TCanvas *cEvtPrim = new TCanvas("cEvtPrim", "", width, height);
+  cEvtPrim -> SetLogx(fLogX);
+  cEvtPrim -> SetLogy(fLogY);
+  cEvtPrim -> SetGrid(fGrid, fGrid);
+  cEvtPrim -> SetTicks(fTick, fTick);
+  cEvtPrim -> SetBorderMode(fMode);
+  cEvtPrim -> SetBorderSize(fBord);
+  cEvtPrim -> SetFrameBorderMode(fFrame);
+  cEvtPrim -> SetLeftMargin(fMarginBig);
+  cEvtPrim -> SetTopMargin(fMarginSmall);
+  cEvtPrim -> SetRightMargin(fMarginSmall);
+  cEvtPrim -> SetBottomMargin(fMarginBig);
+  cEvtPrim -> cd();
+  hEvtPrim -> Draw();
+  cEvtPrim -> Write();
+  cEvtPrim -> Close();
+  cout << "    Made plots." << endl;
+
+  // eTtrg (no tsp cuts)
+  TCanvas *cTrgEt = new TCanvas("cTrgEt", "", width, height);
+  cTrgEt    -> SetLogx(fLogX);
+  cTrgEt    -> SetLogy(fLogY);
+  cTrgEt    -> SetGrid(fGrid, fGrid);
+  cTrgEt    -> SetTicks(fTick, fTick);
+  cTrgEt    -> SetBorderMode(fMode);
+  cTrgEt    -> SetBorderSize(fBord);
+  cTrgEt    -> SetFrameBorderMode(fFrame);
+  cTrgEt    -> SetLeftMargin(fMarginBig);
+  cTrgEt    -> SetTopMargin(fMarginSmall);
+  cTrgEt    -> SetRightMargin(fMarginSmall);
+  cTrgEt    -> SetBottomMargin(fMarginBig);
+  cTrgEt    -> cd();
+  hTrgEt[0] -> Draw();
+  hTrgEt[1] -> Draw("hist same");
+  hTrgEt[1] -> Draw("same");
+  cTrgEt    -> Write();
+  cTrgEt    -> Close();
+
+  TCanvas *cTrgEtVsEtaPhi = new TCanvas("cTrgEtVsEtaPhi", "", bigWidth, height);
+  TPad    *pTrgEtVsEta    = new TPad("pTrgEtVsEta", "", 0., 0., 0.5, 1.);
+  TPad    *pTrgEtVsPhi    = new TPad("pTrgEtVsPhi", "", 0.5, 0., 1., 1.);
+  pTrgEtVsEta    -> SetLogx(fLogX);
+  pTrgEtVsEta    -> SetLogy(fLogY2);
+  pTrgEtVsEta    -> SetLogz(fLogZ);
+  pTrgEtVsEta    -> SetGrid(fGrid, fGrid);
+  pTrgEtVsEta    -> SetTicks(fTick, fTick);
+  pTrgEtVsEta    -> SetBorderMode(fMode);
+  pTrgEtVsEta    -> SetBorderSize(fBord);
+  pTrgEtVsEta    -> SetFrameBorderMode(fFrame);
+  pTrgEtVsEta    -> SetLeftMargin(fMarginBig);
+  pTrgEtVsEta    -> SetTopMargin(fMarginSmall);
+  pTrgEtVsEta    -> SetRightMargin(fMarginBig);
+  pTrgEtVsEta    -> SetBottomMargin(fMarginBig);
+  pTrgEtVsPhi    -> SetLogx(fLogX);
+  pTrgEtVsPhi    -> SetLogy(fLogY2);
+  pTrgEtVsPhi    -> SetLogz(fLogZ);
+  pTrgEtVsPhi    -> SetGrid(fGrid, fGrid);
+  pTrgEtVsPhi    -> SetTicks(fTick, fTick);
+  pTrgEtVsPhi    -> SetBorderMode(fMode);
+  pTrgEtVsPhi    -> SetBorderSize(fBord);
+  pTrgEtVsPhi    -> SetFrameBorderMode(fFrame);
+  pTrgEtVsPhi    -> SetLeftMargin(fMarginBig);
+  pTrgEtVsPhi    -> SetTopMargin(fMarginSmall);
+  pTrgEtVsPhi    -> SetRightMargin(fMarginBig);
+  pTrgEtVsPhi    -> SetBottomMargin(fMarginBig);
+  cTrgEtVsEtaPhi -> cd();
+  pTrgEtVsEta    -> Draw();
+  pTrgEtVsPhi    -> Draw();
+  pTrgEtVsEta    -> cd();
+  hTrgEtVsEta    -> Draw("colz");
+  pTrgEtVsPhi    -> cd();
+  hTrgEtVsPhi    -> Draw("colz");
+  cTrgEtVsEtaPhi -> Write();
+  cTrgEtVsEtaPhi -> Close();
+
+
   // close files
   fOutput         -> cd();
   hEvtNum         -> Write();
-  hEvtVz          -> Write();
-  hEvtVr          -> Write();
+  hEvtVz[0]       -> Write();
+  hEvtVz[1]       -> Write();
+  hEvtVr[0]       -> Write();
+  hEvtVr[1]       -> Write();
   hEvtPrim        -> Write();
-  hTrgEt          -> Write();
+  hTrgEt[0]       -> Write();
+  hTrgEt[1]       -> Write();
   hTrgEta         -> Write();
   hTrgPhi         -> Write();
   hTrgTsp[0]      -> Write();
