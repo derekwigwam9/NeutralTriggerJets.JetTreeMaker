@@ -47,7 +47,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
 
 
   // io parameters
-  const TString sOutput("test.root");
+  const TString sOutput("pp200r9.analysisNoteQaPlots.et920pt0230vz55.d15m10y2018.root");
   const TString sInput("input/pp200r9.merge.root");
 
   // event parameters
@@ -71,8 +71,8 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   const Double_t rFitMin(0.52);
   const Double_t dcaMax(1.);
   const Double_t hTrkMax(1.);
-  const Double_t pTtrkMin(1.2);
-  const Double_t pTtrkMax(20.);
+  const Double_t pTtrkMin(0.2);
+  const Double_t pTtrkMax(30.);
   const Double_t pTbinMin[NTrkBins] = {0.2, 0.2, 2., 5.};
   const Double_t pTbinMax[NTrkBins] = {20., 2., 5., 20.};
 
@@ -987,7 +987,6 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
 
   // set styles
   const UInt_t  fColAll(1);
-  const UInt_t  fColFil(0);
   const UInt_t  fColCut(810);
   const UInt_t  fLinAll(1);
   const UInt_t  fLinCut(1);
@@ -996,11 +995,10 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   const UInt_t  fMarAll(8);
   const UInt_t  fMarCut(8);
   const UInt_t  fTxt(42);
-  const UInt_t  fAln(12);
   const UInt_t  fCnt(1);
   const UInt_t  fColTrg[NTrgTsp]  = {860, 810};
-  const UInt_t  fColPi0[NTrgBins] = {1, 858, 848, 818};
-  const UInt_t  fColGam[NTrgBins] = {1, 808, 898, 888};
+  const UInt_t  fColPi0[NTrgBins] = {1, 860, 840, 820};
+  const UInt_t  fColGam[NTrgBins] = {1, 810, 910, 890};
   const Float_t fBar(0.6);
   const Float_t fLab(0.04);
   const Float_t fTit(0.04);
@@ -1063,7 +1061,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   // vertices
   hEvtVz[0]  -> SetLineColor(fColAll);
   hEvtVz[0]  -> SetLineStyle(fLinAll);
-  hEvtVz[0]  -> SetFillColor(fColFil);
+  hEvtVz[0]  -> SetFillColor(fColAll);
   hEvtVz[0]  -> SetFillStyle(fFilAll);
   hEvtVz[0]  -> SetMarkerColor(fColAll);
   hEvtVz[0]  -> SetMarkerStyle(fMarAll);
@@ -1107,7 +1105,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hEvtVz[1]  -> GetYaxis() -> CenterTitle(fCnt);
   hEvtVr[0]  -> SetLineColor(fColAll);
   hEvtVr[0]  -> SetLineStyle(fLinAll);
-  hEvtVr[0]  -> SetFillColor(fColFil);
+  hEvtVr[0]  -> SetFillColor(fColAll);
   hEvtVr[0]  -> SetFillStyle(fFilAll);
   hEvtVr[0]  -> SetMarkerColor(fColAll);
   hEvtVr[0]  -> SetMarkerStyle(fMarAll);
@@ -1224,7 +1222,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   // no. of tracks
   hEvtPrim -> SetLineColor(fColAll);
   hEvtPrim -> SetLineStyle(fLinAll);
-  hEvtPrim -> SetFillColor(fColFil);
+  hEvtPrim -> SetFillColor(fColAll);
   hEvtPrim -> SetFillStyle(fFilAll);
   hEvtPrim -> SetMarkerColor(fColAll);
   hEvtPrim -> SetMarkerStyle(fMarAll);
@@ -1248,7 +1246,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   // eTtrg (no tsp cuts)
   hTrgEt[0]   -> SetLineColor(fColAll);
   hTrgEt[0]   -> SetLineStyle(fLinAll);
-  hTrgEt[0]   -> SetFillColor(fColFil);
+  hTrgEt[0]   -> SetFillColor(fColAll);
   hTrgEt[0]   -> SetFillStyle(fFilAll);
   hTrgEt[0]   -> SetMarkerColor(fColAll);
   hTrgEt[0]   -> SetMarkerStyle(fMarAll);
@@ -1458,6 +1456,74 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrgEtSum       -> GetYaxis() -> SetLabelSize(fLab);
   hTrgEtSum       -> GetYaxis() -> CenterTitle(fCnt);
 
+  // tsp
+  hTrgTsp[0] -> SetLineColor(fColTrg[0]);
+  hTrgTsp[0] -> SetLineStyle(fLinCut);
+  hTrgTsp[0] -> SetFillColor(fColTrg[0]);
+  hTrgTsp[0] -> SetFillStyle(fFilCut);
+  hTrgTsp[0] -> SetMarkerColor(fColTrg[0]);
+  hTrgTsp[0] -> SetMarkerStyle(fMarCut);
+  hTrgTsp[0] -> SetTitle("");
+  hTrgTsp[0] -> SetTitleFont(fTxt);
+  hTrgTsp[0] -> GetXaxis() -> SetTitle(sTrgTsp.Data());
+  hTrgTsp[0] -> GetXaxis() -> SetTitleFont(fTxt);
+  hTrgTsp[0] -> GetXaxis() -> SetTitleSize(fTit);
+  hTrgTsp[0] -> GetXaxis() -> SetTitleOffset(fOffX);
+  hTrgTsp[0] -> GetXaxis() -> SetLabelFont(fTxt);
+  hTrgTsp[0] -> GetXaxis() -> SetLabelSize(fLab);
+  hTrgTsp[0] -> GetXaxis() -> CenterTitle(fCnt);
+  hTrgTsp[0] -> GetYaxis() -> SetTitle(sCount.Data());
+  hTrgTsp[0] -> GetYaxis() -> SetTitleFont(fTxt);
+  hTrgTsp[0] -> GetYaxis() -> SetTitleSize(fTit);
+  hTrgTsp[0] -> GetYaxis() -> SetTitleOffset(fOffY);
+  hTrgTsp[0] -> GetYaxis() -> SetLabelFont(fTxt);
+  hTrgTsp[0] -> GetYaxis() -> SetLabelSize(fLab);
+  hTrgTsp[0] -> GetYaxis() -> CenterTitle(fCnt);
+  hTrgTsp[1] -> SetLineColor(fColTrg[1]);
+  hTrgTsp[1] -> SetLineStyle(fLinCut);
+  hTrgTsp[1] -> SetFillColor(fColTrg[1]);
+  hTrgTsp[1] -> SetFillStyle(fFilCut);
+  hTrgTsp[1] -> SetMarkerColor(fColTrg[1]);
+  hTrgTsp[1] -> SetMarkerStyle(fMarCut);
+  hTrgTsp[1] -> SetTitle("");
+  hTrgTsp[1] -> SetTitleFont(fTxt);
+  hTrgTsp[1] -> GetXaxis() -> SetTitle(sTrgTsp.Data());
+  hTrgTsp[1] -> GetXaxis() -> SetTitleFont(fTxt);
+  hTrgTsp[1] -> GetXaxis() -> SetTitleSize(fTit);
+  hTrgTsp[1] -> GetXaxis() -> SetTitleOffset(fOffX);
+  hTrgTsp[1] -> GetXaxis() -> SetLabelFont(fTxt);
+  hTrgTsp[1] -> GetXaxis() -> SetLabelSize(fLab);
+  hTrgTsp[1] -> GetXaxis() -> CenterTitle(fCnt);
+  hTrgTsp[1] -> GetYaxis() -> SetTitle(sCount.Data());
+  hTrgTsp[1] -> GetYaxis() -> SetTitleFont(fTxt);
+  hTrgTsp[1] -> GetYaxis() -> SetTitleSize(fTit);
+  hTrgTsp[1] -> GetYaxis() -> SetTitleOffset(fOffY);
+  hTrgTsp[1] -> GetYaxis() -> SetLabelFont(fTxt);
+  hTrgTsp[1] -> GetYaxis() -> SetLabelSize(fLab);
+  hTrgTsp[1] -> GetYaxis() -> CenterTitle(fCnt);
+  hTrgTsp[2] -> SetLineColor(fColAll);
+  hTrgTsp[2] -> SetLineStyle(fLinAll);
+  hTrgTsp[2] -> SetFillColor(fColAll);
+  hTrgTsp[2] -> SetFillStyle(fFilAll);
+  hTrgTsp[2] -> SetMarkerColor(fColAll);
+  hTrgTsp[2] -> SetMarkerStyle(fMarAll);
+  hTrgTsp[2] -> SetTitle("");
+  hTrgTsp[2] -> SetTitleFont(fTxt);
+  hTrgTsp[2] -> GetXaxis() -> SetTitle(sTrgTsp.Data());
+  hTrgTsp[2] -> GetXaxis() -> SetTitleFont(fTxt);
+  hTrgTsp[2] -> GetXaxis() -> SetTitleSize(fTit);
+  hTrgTsp[2] -> GetXaxis() -> SetTitleOffset(fOffX);
+  hTrgTsp[2] -> GetXaxis() -> SetLabelFont(fTxt);
+  hTrgTsp[2] -> GetXaxis() -> SetLabelSize(fLab);
+  hTrgTsp[2] -> GetXaxis() -> CenterTitle(fCnt);
+  hTrgTsp[2] -> GetYaxis() -> SetTitle(sCount.Data());
+  hTrgTsp[2] -> GetYaxis() -> SetTitleFont(fTxt);
+  hTrgTsp[2] -> GetYaxis() -> SetTitleSize(fTit);
+  hTrgTsp[2] -> GetYaxis() -> SetTitleOffset(fOffY);
+  hTrgTsp[2] -> GetYaxis() -> SetLabelFont(fTxt);
+  hTrgTsp[2] -> GetYaxis() -> SetLabelSize(fLab);
+  hTrgTsp[2] -> GetYaxis() -> CenterTitle(fCnt);
+
   // fTrg vs hTrg
   hTrgEtaVsPhi -> SetTitle("");
   hTrgEtaVsPhi -> SetTitleFont(fTxt);
@@ -1486,7 +1552,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   // nFit and nFit/nPoss
   hTrkNfit[0]  -> SetLineColor(fColAll);
   hTrkNfit[0]  -> SetLineStyle(fLinAll);
-  hTrkNfit[0]  -> SetFillColor(fColFil);
+  hTrkNfit[0]  -> SetFillColor(fColAll);
   hTrkNfit[0]  -> SetFillStyle(fFilAll);
   hTrkNfit[0]  -> SetMarkerColor(fColAll);
   hTrkNfit[0]  -> SetMarkerStyle(fMarAll);
@@ -1576,7 +1642,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
 
   hTrkRfit[0] -> SetLineColor(fColAll);
   hTrkRfit[0] -> SetLineStyle(fLinAll);
-  hTrkRfit[0] -> SetFillColor(fColFil);
+  hTrkRfit[0] -> SetFillColor(fColAll);
   hTrkRfit[0] -> SetFillStyle(fFilAll);
   hTrkRfit[0] -> SetMarkerColor(fColAll);
   hTrkRfit[0] -> SetMarkerStyle(fMarAll);
@@ -1622,7 +1688,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   // dca
   hTrkDca[0]  -> SetLineColor(fColAll);
   hTrkDca[0]  -> SetLineStyle(fLinAll);
-  hTrkDca[0]  -> SetFillColor(fColFil);
+  hTrkDca[0]  -> SetFillColor(fColAll);
   hTrkDca[0]  -> SetFillStyle(fFilAll);
   hTrkDca[0]  -> SetMarkerColor(fColAll);
   hTrkDca[0]  -> SetMarkerStyle(fMarAll);
@@ -1713,7 +1779,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   // eta
   hTrkEta[0] -> SetLineColor(fColAll);
   hTrkEta[0] -> SetLineStyle(fLinAll);
-  hTrkEta[0] -> SetFillColor(fColFil);
+  hTrkEta[0] -> SetFillColor(fColAll);
   hTrkEta[0] -> SetFillStyle(fFilAll);
   hTrkEta[0] -> SetMarkerColor(fColAll);
   hTrkEta[0] -> SetMarkerStyle(fMarAll);
@@ -1759,7 +1825,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   // pTtrk
   hTrkPt[0]    -> SetLineColor(fColAll);
   hTrkPt[0]    -> SetLineStyle(fLinAll);
-  hTrkPt[0]    -> SetFillColor(fColFil);
+  hTrkPt[0]    -> SetFillColor(fColAll);
   hTrkPt[0]    -> SetFillStyle(fFilAll);
   hTrkPt[0]    -> SetMarkerColor(fColAll);
   hTrkPt[0]    -> SetMarkerStyle(fMarAll);
@@ -1824,11 +1890,11 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkPtBin[0] -> GetYaxis() -> SetLabelSize(fLab);
   hTrkPtBin[0] -> GetYaxis() -> CenterTitle(fCnt);
   hTrkPtBin[1] -> SetLineColor(fColTrg[1]);
-  hTrkPtBin[1] -> SetLineStyle(fLinCut);
+  hTrkPtBin[1] -> SetLineStyle(fLinAll);
   hTrkPtBin[1] -> SetFillColor(fColTrg[1]);
-  hTrkPtBin[1] -> SetFillStyle(fFilCut);
+  hTrkPtBin[1] -> SetFillStyle(fFilAll);
   hTrkPtBin[1] -> SetMarkerColor(fColTrg[1]);
-  hTrkPtBin[1] -> SetMarkerStyle(fMarCut);
+  hTrkPtBin[1] -> SetMarkerStyle(fMarAll);
   hTrkPtBin[1] -> SetTitle("");
   hTrkPtBin[1] -> SetTitleFont(fTxt);
   hTrkPtBin[1] -> GetXaxis() -> SetTitle(sTrkPt.Data());
@@ -1870,11 +1936,11 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkDfBin[0]   -> GetYaxis() -> SetLabelSize(fLab);
   hTrkDfBin[0]   -> GetYaxis() -> CenterTitle(fCnt);
   hTrkDfBin[1]   -> SetLineColor(fColTrg[1]);
-  hTrkDfBin[1]   -> SetLineStyle(fLinCut);
+  hTrkDfBin[1]   -> SetLineStyle(fLinAll);
   hTrkDfBin[1]   -> SetFillColor(fColTrg[1]);
-  hTrkDfBin[1]   -> SetFillStyle(fFilCut);
+  hTrkDfBin[1]   -> SetFillStyle(fFilAll);
   hTrkDfBin[1]   -> SetMarkerColor(fColTrg[1]);
-  hTrkDfBin[1]   -> SetMarkerStyle(fMarCut);
+  hTrkDfBin[1]   -> SetMarkerStyle(fMarAll);
   hTrkDfBin[1]   -> SetTitle("");
   hTrkDfBin[1]   -> SetTitleFont(fTxt);
   hTrkDfBin[1]   -> GetXaxis() -> SetTitle(sTrkDf.Data());
@@ -1891,12 +1957,6 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkDfBin[1]   -> GetYaxis() -> SetLabelFont(fTxt);
   hTrkDfBin[1]   -> GetYaxis() -> SetLabelSize(fLab);
   hTrkDfBin[1]   -> GetYaxis() -> CenterTitle(fCnt);
-  hTrkPtVsDf[0]  -> SetLineColor(fColTrg[0]);
-  hTrkPtVsDf[0]  -> SetLineStyle(fLinAll);
-  hTrkPtVsDf[0]  -> SetFillColor(fColTrg[0]);
-  hTrkPtVsDf[0]  -> SetFillStyle(fFilAll);
-  hTrkPtVsDf[0]  -> SetMarkerColor(fColTrg[0]);
-  hTrkPtVsDf[0]  -> SetMarkerStyle(fMarAll);
   hTrkPtVsDf[0]  -> SetTitle("");
   hTrkPtVsDf[0]  -> SetTitleFont(fTxt);
   hTrkPtVsDf[0]  -> GetXaxis() -> SetTitle(sTrkDf.Data());
@@ -1913,12 +1973,6 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkPtVsDf[0]  -> GetYaxis() -> SetLabelFont(fTxt);
   hTrkPtVsDf[0]  -> GetYaxis() -> SetLabelSize(fLab);
   hTrkPtVsDf[0]  -> GetYaxis() -> CenterTitle(fCnt);
-  hTrkPtVsDf[1]  -> SetLineColor(fColTrg[1]);
-  hTrkPtVsDf[1]  -> SetLineStyle(fLinCut);
-  hTrkPtVsDf[1]  -> SetFillColor(fColTrg[1]);
-  hTrkPtVsDf[1]  -> SetFillStyle(fFilCut);
-  hTrkPtVsDf[1]  -> SetMarkerColor(fColTrg[1]);
-  hTrkPtVsDf[1]  -> SetMarkerStyle(fMarCut);
   hTrkPtVsDf[1]  -> SetTitle("");
   hTrkPtVsDf[1]  -> SetTitleFont(fTxt);
   hTrkPtVsDf[1]  -> GetXaxis() -> SetTitle(sTrkDf.Data());
@@ -1935,12 +1989,6 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkPtVsDf[1]  -> GetYaxis() -> SetLabelFont(fTxt);
   hTrkPtVsDf[1]  -> GetYaxis() -> SetLabelSize(fLab);
   hTrkPtVsDf[1]  -> GetYaxis() -> CenterTitle(fCnt);
-  hTrkDfVsEta[0] -> SetLineColor(fColTrg[0]);
-  hTrkDfVsEta[0] -> SetLineStyle(fLinAll);
-  hTrkDfVsEta[0] -> SetFillColor(fColTrg[0]);
-  hTrkDfVsEta[0] -> SetFillStyle(fFilAll);
-  hTrkDfVsEta[0] -> SetMarkerColor(fColTrg[0]);
-  hTrkDfVsEta[0] -> SetMarkerStyle(fMarAll);
   hTrkDfVsEta[0] -> SetTitle("");
   hTrkDfVsEta[0] -> SetTitleFont(fTxt);
   hTrkDfVsEta[0] -> GetXaxis() -> SetTitle(sTrkEta.Data());
@@ -1957,12 +2005,13 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkDfVsEta[0] -> GetYaxis() -> SetLabelFont(fTxt);
   hTrkDfVsEta[0] -> GetYaxis() -> SetLabelSize(fLab);
   hTrkDfVsEta[0] -> GetYaxis() -> CenterTitle(fCnt);
-  hTrkDfVsEta[1] -> SetLineColor(fColTrg[1]);
-  hTrkDfVsEta[1] -> SetLineStyle(fLinCut);
-  hTrkDfVsEta[1] -> SetFillColor(fColTrg[1]);
-  hTrkDfVsEta[1] -> SetFillStyle(fFilCut);
-  hTrkDfVsEta[1] -> SetMarkerColor(fColTrg[1]);
-  hTrkDfVsEta[1] -> SetMarkerStyle(fMarCut);
+  hTrkDfVsEta[0] -> GetZaxis() -> SetTitle("");
+  hTrkDfVsEta[0] -> GetZaxis() -> SetTitleFont(fTxt);
+  hTrkDfVsEta[0] -> GetZaxis() -> SetTitleSize(fTit);
+  hTrkDfVsEta[0] -> GetZaxis() -> SetTitleOffset(fOffZ);
+  hTrkDfVsEta[0] -> GetZaxis() -> SetLabelFont(fTxt);
+  hTrkDfVsEta[0] -> GetZaxis() -> SetLabelSize(fLab);
+  hTrkDfVsEta[0] -> GetZaxis() -> CenterTitle(fCnt);
   hTrkDfVsEta[1] -> SetTitle("");
   hTrkDfVsEta[1] -> SetTitleFont(fTxt);
   hTrkDfVsEta[1] -> GetXaxis() -> SetTitle(sTrkEta.Data());
@@ -1979,7 +2028,111 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkDfVsEta[1] -> GetYaxis() -> SetLabelFont(fTxt);
   hTrkDfVsEta[1] -> GetYaxis() -> SetLabelSize(fLab);
   hTrkDfVsEta[1] -> GetYaxis() -> CenterTitle(fCnt);
+  hTrkDfVsEta[1] -> GetZaxis() -> SetTitle("");
+  hTrkDfVsEta[1] -> GetZaxis() -> SetTitleFont(fTxt);
+  hTrkDfVsEta[1] -> GetZaxis() -> SetTitleSize(fTit);
+  hTrkDfVsEta[1] -> GetZaxis() -> SetTitleOffset(fOffZ);
+  hTrkDfVsEta[1] -> GetZaxis() -> SetLabelFont(fTxt);
+  hTrkDfVsEta[1] -> GetZaxis() -> SetLabelSize(fLab);
+  hTrkDfVsEta[1] -> GetZaxis() -> CenterTitle(fCnt);
   cout << "    Styles set." << endl;
+
+
+  // make legends
+  const UInt_t  fColLeg(0);
+  const UInt_t  fAln(12);
+  const Float_t xyLeg[4] = {0.1, 0.1, 0.3, 0.3};
+  const Float_t xyTxt[4] = {0.3, 0.1, 0.5, 0.3};
+
+  TLegend *lEvtVz = new TLegend(xyLeg[0], xyLeg[1], xyLeg[2], xyLeg[3]);
+  lEvtVz -> SetFillColor(fColLeg);
+  lEvtVz -> SetLineColor(fColLeg);
+  lEvtVz -> SetTextFont(fTxt);
+  lEvtVz -> SetTextAlign(fAln);
+
+  TLegend *lTrgEt    = (TLegend*) lEvtVz -> Clone();
+  TLegend *lTrgEtPi0 = (TLegend*) lEvtVz -> Clone();
+  TLegend *lTrgEtGam = (TLegend*) lEvtVz -> Clone();
+  TLegend *lTrgEtSum = (TLegend*) lEvtVz -> Clone();
+  TLegend *lTrgTsp   = (TLegend*) lEvtVz -> Clone();
+  TLegend *lTrkNfit  = (TLegend*) lEvtVz -> Clone();
+  TLegend *lTrkRfit  = (TLegend*) lEvtVz -> Clone();
+  TLegend *lTrkDca   = (TLegend*) lEvtVz -> Clone();
+  TLegend *lTrkEta   = (TLegend*) lEvtVz -> Clone();
+  TLegend *lTrkPt    = (TLegend*) lEvtVz -> Clone();
+  TLegend *lTrkPtBin = (TLegend*) lEvtVz -> Clone();
+
+  // vertices
+  lEvtVz -> AddEntry(hEvtVz[0], "all events");
+  lEvtVz -> AddEntry(hEvtVz[1], "cut events");
+
+  // eTtrg
+  lTrgEt    -> AddEntry(hTrgEt[0], "all triggers");
+  lTrgEt    -> AddEntry(hTrgEt[1], "cut triggers");
+  lTrgEtPi0 -> AddEntry(hTrgEtBin[1][0], "E_{T}^{trg} #in (9, 11) GeV");
+  lTrgEtPi0 -> AddEntry(hTrgEtBin[2][0], "E_{T}^{trg} #in (11, 15) GeV");
+  lTrgEtPi0 -> AddEntry(hTrgEtBin[3][0], "E_{T}^{trg} #in (15, 20) GeV");
+  lTrgEtGam -> AddEntry(hTrgEtBin[1][1], "E_{T}^{trg} #in (9, 11) GeV");
+  lTrgEtGam -> AddEntry(hTrgEtBin[2][1], "E_{T}^{trg} #in (11, 15) GeV");
+  lTrgEtGam -> AddEntry(hTrgEtBin[3][1], "E_{T}^{trg} #in (15, 20) GeV");
+  lTrgEtSum -> AddEntry(hTrgEtBin[0][0], "#pi^{0} triggers");
+  lTrgEtSum -> AddEntry(hTrgEtBin[0][1], "#gamma^{rich} triggers");
+  lTrgEtSum -> AddEntry(hTrgEtSum, "both triggers");
+
+  // tsp
+  lTrgTsp -> AddEntry(hTrgTsp[2], "all triggers");
+  lTrgTsp -> AddEntry(hTrgTsp[1], "#gamma^{rich} triggers");
+  lTrgTsp -> AddEntry(hTrgTsp[0], "#pi^{0} triggers");
+
+  // nFit and nFit/nPoss
+  lTrkNfit -> AddEntry(hTrkNfit[0], "all tracks");
+  lTrkNfit -> AddEntry(hTrkNfit[1], "cut tracks");
+  lTrkRfit -> AddEntry(hTrkRfit[0], "all tracks");
+  lTrkRfit -> AddEntry(hTrkRfit[1], "cut tracks");
+
+  // dca
+  lTrkDca -> AddEntry(hTrkDca[0], "all tracks");
+  lTrkDca -> AddEntry(hTrkDca[1], "cut tracks");
+
+  // eta
+  lTrkEta -> AddEntry(hTrkEta[0], "all tracks");
+  lTrkEta -> AddEntry(hTrkEta[1], "cut tracks");
+
+  // pTtrk
+  lTrkPt    -> AddEntry(hTrkPt[0], "all tracks");
+  lTrkPt    -> AddEntry(hTrkPt[1], "cut tracks");
+  lTrkPtBin -> AddEntry(hTrkPtBin[0], "#pi^{0} trigger");
+  lTrkPtBin -> AddEntry(hTrkPtBin[1], "#gamma^{rich} trigger");
+  cout << "    Made legends." << endl;
+
+
+  // make labels
+  TPaveText *pEvt = new TPaveText(xyTxt[0], xyTxt[1], xyTxt[2], xyTxt[3], "NDC NB");
+  pEvt -> SetFillColor(fColLeg);
+  pEvt -> SetLineColor(fColLeg);
+  pEvt -> SetTextFont(fTxt);
+  pEvt -> SetTextAlign(fAln);
+
+  TPaveText *pTrg = (TPaveText*) pEvt -> Clone();
+  TPaveText *pPi0 = (TPaveText*) pEvt -> Clone();
+  TPaveText *pGam = (TPaveText*) pEvt -> Clone();
+  TPaveText *pSum = (TPaveText*) pEvt -> Clone();
+
+  pEvt -> AddText("pp-collisions, #sqrt{s} = 200 GeV");
+  pEvt -> AddText("Run9 data, L2gamma stream");
+  pEvt -> AddText("Bad runs removed");
+  pTrg -> AddText("pp-collisions, #sqrt{s} = 200 GeV");
+  pTrg -> AddText("Run9 data, L2gamma stream");
+  pTrg -> AddText("Bad runs and towers removed");
+  pPi0 -> AddText("pp-collisions, #sqrt{s} = 200 GeV");
+  pPi0 -> AddText("#pi^{0} triggers");
+  pPi0 -> AddText("E_{T}^{trg} #in (9, 20) GeV");
+  pGam -> AddText("pp-collisions, #sqrt{s} = 200 GeV");
+  pGam -> AddText("#gamma^{rich} triggers");
+  pGam -> AddText("E_{T}^{trg} #in (9, 20) GeV");
+  pSum -> AddText("pp-collisions, #sqrt{s} = 200 GeV");
+  pSum -> AddText("#pi^{0} and #gamma^{rich} triggers");
+  pSum -> AddText("E_{T}^{trg} #in (9, 20) GeV");
 
 
   // draw plots
@@ -2036,6 +2189,8 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hEvtVz[0] -> Draw("");
   hEvtVz[1] -> Draw("hist same");
   hEvtVz[1] -> Draw("same");
+  lEvtVz    -> Draw();
+  pEvt      -> Draw();
   cEvtVz    -> Write();
   cEvtVz    -> Close();
 
@@ -2073,6 +2228,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hEvtVxVsVz   -> Draw("colz");
   pEvtVyVsVz   -> cd();
   hEvtVyVsVz   -> Draw("colz");
+  pEvt         -> Draw();
   cEvtVyVxVsVz -> Write();
   cEvtVyVxVsVz -> Close();
 
@@ -2091,6 +2247,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   cEvtVyVsVx -> SetBottomMargin(fMarginBig);
   cEvtVyVsVx -> cd();
   hEvtVyVsVx -> Draw("colz");
+  pEvt       -> Draw();
   cEvtVyVsVx -> Write();
   cEvtVyVsVx -> Close();
 
@@ -2109,6 +2266,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   cEvtPrim -> SetBottomMargin(fMarginBig);
   cEvtPrim -> cd();
   hEvtPrim -> Draw();
+  pEvt     -> Draw();
   cEvtPrim -> Write();
   cEvtPrim -> Close();
 
@@ -2129,6 +2287,8 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrgEt[0] -> Draw();
   hTrgEt[1] -> Draw("hist same");
   hTrgEt[1] -> Draw("same");
+  lTrgEt    -> Draw();
+  pTrg      -> Draw();
   cTrgEt    -> Write();
   cTrgEt    -> Close();
 
@@ -2166,6 +2326,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrgEtVsEta    -> Draw("colz");
   pTrgEtVsPhi    -> cd();
   hTrgEtVsPhi    -> Draw("colz");
+  pSum           -> Draw();
   cTrgEtVsEtaPhi -> Write();
   cTrgEtVsEtaPhi -> Close();
 
@@ -2202,10 +2363,14 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrgEtBin[1][0] -> Draw();
   hTrgEtBin[2][0] -> Draw("same");
   hTrgEtBin[3][0] -> Draw("same");
+  lTrgEtPi0       -> Draw();
+  pPi0            -> Draw();
   pTrgEtGam       -> cd();
   hTrgEtBin[1][1] -> Draw();
   hTrgEtBin[2][1] -> Draw("same");
   hTrgEtBin[3][1] -> Draw("same");
+  lTrgEtGam       -> Draw();
+  pGam            -> Draw();
   cTrgEtBin       -> Write();
   cTrgEtBin       -> Close();
 
@@ -2224,9 +2389,36 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrgEtBin[0][0] -> Draw();
   hTrgEtBin[0][1] -> Draw("same");
   hTrgEtSum       -> Draw("same");
+  lTrgEtSum       -> Draw();
+  pSum            -> Draw();
   cTrgEtSum       -> Write();
   cTrgEtSum       -> Close();
 
+  // tsp
+  TCanvas *cTrgTsp = new TCanvas("cTrgTsp", "", width, height);
+  cTrgTsp    -> SetLogx(fLogX);
+  cTrgTsp    -> SetLogy(fLogY2);
+  cTrgTsp    -> SetGrid(fGrid, fGrid);
+  cTrgTsp    -> SetTicks(fTick, fTick);
+  cTrgTsp    -> SetBorderMode(fMode);
+  cTrgTsp    -> SetBorderSize(fBord);
+  cTrgTsp    -> SetFrameBorderMode(fFrame);
+  cTrgTsp    -> SetLeftMargin(fMarginBig);
+  cTrgTsp    -> SetTopMargin(fMarginSmall);
+  cTrgTsp    -> SetRightMargin(fMarginSmall);
+  cTrgTsp    -> SetBottomMargin(fMarginBig);
+  cTrgTsp    -> cd();
+  hTrgTsp[2] -> Draw();
+  hTrgTsp[1] -> Draw("hist same");
+  hTrgTsp[1] -> Draw("same");
+  hTrgTsp[0] -> Draw("hist same");
+  hTrgTsp[0] -> Draw("same");
+  lTrgTsp    -> Draw();
+  pSum       -> Draw();
+  cTrgTsp    -> Write();
+  cTrgTsp    -> Close();
+
+  // fTrg vs. hTrg
   TCanvas *cTrgEtaVsPhi = new TCanvas("cTrgEtaVsPhi", "", width, height);
   cTrgEtaVsPhi -> SetLogx(fLogX);
   cTrgEtaVsPhi -> SetLogy(fLogY2);
@@ -2241,6 +2433,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   cTrgEtaVsPhi -> SetRightMargin(fMarginBig);
   cTrgEtaVsPhi -> SetBottomMargin(fMarginBig);
   hTrgEtaVsPhi -> Draw("colz");
+  pSum         -> Draw();
   cTrgEtaVsPhi -> Write();
   cTrgEtaVsPhi -> Close();
 
@@ -2261,6 +2454,8 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkNfit[0] -> Draw();
   hTrkNfit[1] -> Draw("hist same");
   hTrkNfit[1] -> Draw("same");
+  lTrkNfit    -> Draw();
+  pSum        -> Draw();
   cTrkNfit    -> Write();
   cTrkNfit    -> Close();
 
@@ -2280,6 +2475,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   cTrkNfitVsPt -> cd();
   hTrkNfitVsPt -> Draw("colz");
   pTrkNfitVsPt -> Draw("same");
+  pSum         -> Draw();
   cTrkNfitVsPt -> Write();
   cTrkNfitVsPt -> Close();
 
@@ -2299,6 +2495,8 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkRfit[0] -> Draw();
   hTrkRfit[1] -> Draw("hist same");
   hTrkRfit[1] -> Draw("same");
+  lTrkRfit    -> Draw();
+  pSum        -> Draw();
   cTrkRfit    -> Write();
   cTrkRfit    -> Close();
 
@@ -2319,6 +2517,8 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkDca[0] -> Draw();
   hTrkDca[1] -> Draw("hist same");
   hTrkDca[1] -> Draw("same");
+  lTrkDca    -> Draw();
+  pSum       -> Draw();
   cTrkDca    -> Write();
   cTrkDca    -> Close();
 
@@ -2338,6 +2538,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   cTrkDcaVsPt -> cd();
   hTrkDcaVsPt -> Draw("colz");
   pTrkDcaVsPt -> Draw("same");
+  pSum        -> Draw();
   cTrkDcaVsPt -> Write();
   cTrkDcaVsPt -> Close();
 
@@ -2358,6 +2559,8 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkEta[0] -> Draw();
   hTrkEta[1] -> Draw("hist same");
   hTrkEta[1] -> Draw("same");
+  lTrkEta    -> Draw();
+  pSum       -> Draw();
   cTrkEta    -> Write();
   cTrkEta    -> Close();
 
@@ -2378,6 +2581,8 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkPt[0] -> Draw();
   hTrkPt[1] -> Draw("hist same");
   hTrkPt[1] -> Draw("same");
+  lTrkPt    -> Draw();
+  pSum      -> Draw();
   cTrkPt    -> Write();
   cTrkPt    -> Close();
 
@@ -2396,6 +2601,8 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   cTrkPtBin    -> cd();
   hTrkPtBin[0] -> Draw();
   hTrkPtBin[1] -> Draw("same");
+  lTrkPtBin    -> Draw();
+  pSum         -> Draw();
   cTrkPtBin    -> Write();
   cTrkPtBin    -> Close();
 
@@ -2458,8 +2665,10 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   pDfGam        -> Draw();
   pDfVsPtPi0    -> cd();
   hTrkPtVsDf[0] -> Draw("colz");
+  pPi0          -> Draw();
   pDfVsPtGam    -> cd();
   hTrkPtVsDf[1] -> Draw("colz");
+  pGam          -> Draw();
   pDfPi0        -> cd();
   hTrkDfBin[0]  -> Draw();
   pDfGam        -> cd();
@@ -2499,8 +2708,10 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   pDfVsEtaGam    -> Draw();
   pDfVsEtaPi0    -> cd();
   hTrkDfVsEta[0] -> Draw("colz");
+  pPi0           -> Draw();
   pDfVsEtaGam    -> cd();
   hTrkDfVsEta[1] -> Draw("colz");
+  pGam           -> Draw();
   cTrkDfVsEta    -> Write();
   cTrkDfVsEta    -> Close();
   cout << "    Made plots." << endl;
