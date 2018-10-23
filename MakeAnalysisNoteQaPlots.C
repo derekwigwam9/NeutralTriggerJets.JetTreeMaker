@@ -510,7 +510,8 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
 
   // define bad run and hot tower lists
   const UInt_t badRunList[NBadRuns] = {10114082, 10120093, 10159043, 10166054, 10126064, 10128094, 10128102, 10131009, 10131075, 10131087, 10132004, 10135072, 10136036, 10138049, 10140005, 10140011, 10142012, 10142035, 10142093, 10144038, 10144074, 10149008, 10150005, 10151001, 10152010, 10156090, 10157015, 10157053, 10158047, 10160006, 10161006, 10161016, 10161024, 10162007, 10165027, 10165077, 10166024, 10169033, 10170011, 10170029, 10170047, 10171011, 10172054, 10172059, 10172077};
-  const UInt_t hotTwrList[NHotTwr] = {1, 35, 141, 187, 224, 341, 424, 594, 814, 899, 900, 1046, 1128, 1132, 1244, 1382, 1388, 1405, 1588, 1766, 1773, 2066, 2160, 2253, 2281, 2284, 2301, 2303, 2306, 2590, 3007, 3495, 3840, 4043, 4047, 4053, 4057, 4121, 4442, 4569, 4617};
+  //const UInt_t hotTwrList[NHotTwr] = {34, 106, 113, 160, 266, 267, 275, 280, 282, 286, 287, 293, 410, 504, 533, 541, 555, 561, 562, 594, 615, 616, 629, 633, 637, 638, 647, 650, 653, 657, 671, 673, 743, 789, 790, 791, 792, 806, 809, 810, 811, 812, 813, 814, 821, 822, 823, 824, 829, 830, 831, 832, 837, 841, 842, 843, 844, 846, 849, 850, 851, 852, 857, 875, 897, 899, 903, 939, 953, 954, 956, 993, 1026, 1046, 1048, 1080, 1081, 1100, 1125, 1130, 1132, 1180, 1197, 1198, 1199, 1200, 1207, 1217, 1218, 1219, 1220, 1221, 1222, 1223, 1224, 1237, 1238, 1240, 1241, 1242, 1243, 1244, 1257, 1258, 1259, 1260, 1312, 1348, 1353, 1354, 1388, 1407, 1409, 1434, 1448, 1537, 1567, 1574, 1597, 1612, 1654, 1668, 1713, 1762, 1765, 1766, 1877, 1878, 1984, 2032, 2043, 2054, 2073, 2077, 2092, 2093, 2097, 2107, 2162, 2168, 2214, 2305, 2392, 2409, 2415, 2439, 2459, 2589, 2590, 2633, 2652, 2749, 2834, 2961, 2969, 3005, 3017, 3070, 3071, 3186, 3220, 3289, 3360, 3493, 3494, 3495, 3508, 3588, 3604, 3611, 3668, 3678, 3679, 3690, 3692, 3732, 3738, 3838, 3840, 3927, 3945, 4005, 4006, 4013, 4018, 4019, 4053, 4059, 4124, 4331, 4355, 4357, 4458, 4464, 4500, 4677, 4678, 4684, 4768, 360, 493, 779, 1284, 1306, 1337, 1438, 1709, 2027, 2445, 3407, 3720, 4217, 4288, 95, 96, 296, 316, 443, 479, 555, 562, 637, 671, 709, 740, 743, 796, 857, 897, 899, 915, 953, 1130, 1132, 1294, 1318, 1337, 1348, 1359, 1378, 1427, 1429, 1440, 1537, 1563, 1574, 1709, 1763, 1773, 1819, 1854, 1874, 1936, 1938, 2018, 2043, 2098, 2099, 2256, 2259, 2294, 2514, 2520, 2552, 2589, 2598, 2680, 2706, 2799, 2880, 2897, 2917, 2969, 3020, 3028, 3310, 3319, 3375, 3399, 3504, 3539, 3541, 3679, 3690, 3692, 3718, 3719, 3720, 3738, 3806, 3838, 3840, 3928, 4013, 4017, 4038, 4053, 4057, 4058, 4079, 4097, 4099};  // big list
+  const UInt_t hotTwrList[NHotTwr] = {1, 35, 141, 187, 224, 341, 424, 594, 814, 899, 900, 1046, 1128, 1132, 1244, 1382, 1388, 1405, 1588, 1766, 1773, 2066, 2160, 2253, 2281, 2284, 2301, 2303, 2306, 2590, 3007, 3495, 3840, 4043, 4047, 4053, 4057, 4121, 4442, 4569, 4617};  // small list
   cout << "    Bad run and hot tower lists defined:\n"
        << "      " << NBadRuns << " bad runs, " << NHotTwr << " hot towers."
        << endl;
@@ -781,7 +782,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
     const Bool_t isInAdcCut    = (adc <= adcMax);
     const Bool_t isInStrCut    = ((eH4 >= eStrMin) && (eF4 >= eStrMin));
     const Bool_t isInProjCut   = (pProj < pProjMax);
-    const Bool_t isInEtaTrgCut = (TMath::Abs(hDet) < hTrgMax);
+    const Bool_t isInEtaTrgCut = ((TMath::Abs(hDet) < hTrgMax) && (TMath::Abs(hPhys)));
     const Bool_t isInEtCut     = ((eTtrg >= eTtrgMin) && (eTtrg < eTtrgMax));
     const Bool_t isInPi0cut    = ((tspTrg > tspPi0[0]) && (tspTrg < tspPi0[1]));
     const Bool_t isInGamCut    = ((tspTrg > tspGam[0]) && (tspTrg < tspGam[1]));
@@ -987,7 +988,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
 
   // set styles
   const UInt_t  fColAll(1);
-  const UInt_t  fColCut(810);
+  const UInt_t  fColCut(899);
   const UInt_t  fLinAll(1);
   const UInt_t  fLinCut(1);
   const UInt_t  fFilAll(0);
@@ -1913,11 +1914,11 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkPtBin[1] -> GetYaxis() -> CenterTitle(fCnt);
 
   // dFtrk
-  hTrkDfBin[0]   -> SetLineColor(fColTrg[0]);
+  hTrkDfBin[0]   -> SetLineColor(fColAll);
   hTrkDfBin[0]   -> SetLineStyle(fLinAll);
-  hTrkDfBin[0]   -> SetFillColor(fColTrg[0]);
+  hTrkDfBin[0]   -> SetFillColor(fColAll);
   hTrkDfBin[0]   -> SetFillStyle(fFilAll);
-  hTrkDfBin[0]   -> SetMarkerColor(fColTrg[0]);
+  hTrkDfBin[0]   -> SetMarkerColor(fColAll);
   hTrkDfBin[0]   -> SetMarkerStyle(fMarAll);
   hTrkDfBin[0]   -> SetTitle("");
   hTrkDfBin[0]   -> SetTitleFont(fTxt);
@@ -1935,11 +1936,11 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   hTrkDfBin[0]   -> GetYaxis() -> SetLabelFont(fTxt);
   hTrkDfBin[0]   -> GetYaxis() -> SetLabelSize(fLab);
   hTrkDfBin[0]   -> GetYaxis() -> CenterTitle(fCnt);
-  hTrkDfBin[1]   -> SetLineColor(fColTrg[1]);
+  hTrkDfBin[1]   -> SetLineColor(fColAll);
   hTrkDfBin[1]   -> SetLineStyle(fLinAll);
-  hTrkDfBin[1]   -> SetFillColor(fColTrg[1]);
+  hTrkDfBin[1]   -> SetFillColor(fColAll);
   hTrkDfBin[1]   -> SetFillStyle(fFilAll);
-  hTrkDfBin[1]   -> SetMarkerColor(fColTrg[1]);
+  hTrkDfBin[1]   -> SetMarkerColor(fColAll);
   hTrkDfBin[1]   -> SetMarkerStyle(fMarAll);
   hTrkDfBin[1]   -> SetTitle("");
   hTrkDfBin[1]   -> SetTitleFont(fTxt);
@@ -2133,6 +2134,7 @@ void MakeAnalysisNoteQaPlots(const Bool_t isInBatchMode=false) {
   pSum -> AddText("pp-collisions, #sqrt{s} = 200 GeV");
   pSum -> AddText("#pi^{0} and #gamma^{rich} triggers");
   pSum -> AddText("E_{T}^{trg} #in (9, 20) GeV");
+  cout << "    Made text boxes." << endl;
 
 
   // draw plots
