@@ -190,7 +190,7 @@ void StJetTreeMaker::Make() {
     const Bool_t isPi0     = IsPi0(tsp);
     const Bool_t isGam     = IsGamma(tsp);
     const Bool_t isGoodTwr = IsGoodTowerID(twrID);
-    const Bool_t isGoodTrg = IsGoodTrigger(adc, eEta4, ePhi4, pProj, hTwr, eTtrg, tsp);
+    const Bool_t isGoodTrg = IsGoodTrigger(adc, eEta4, ePhi4, pProj, hTwr, hTrg, eTtrg, tsp);
     if (!isGoodTwr || !isGoodTrg) continue;
 
     // count triggers

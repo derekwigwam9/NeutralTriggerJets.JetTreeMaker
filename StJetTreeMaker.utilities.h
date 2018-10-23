@@ -382,8 +382,11 @@ Bool_t StJetTreeMaker::IsGoodRunID(const UInt_t runID) {
 
 Bool_t StJetTreeMaker::IsGoodTowerID(const UInt_t twrID) {
 
-  // hot tower list (pp200 run9)
+  // hot tower list (pp200 run9) [big list]
   const UInt_t hotTwrList[NHotTwr] = {34, 106, 113, 160, 266, 267, 275, 280, 282, 286, 287, 293, 410, 504, 533, 541, 555, 561, 562, 594, 615, 616, 629, 633, 637, 638, 647, 650, 653, 657, 671, 673, 743, 789, 790, 791, 792, 806, 809, 810, 811, 812, 813, 814, 821, 822, 823, 824, 829, 830, 831, 832, 837, 841, 842, 843, 844, 846, 849, 850, 851, 852, 857, 875, 897, 899, 903, 939, 953, 954, 956, 993, 1026, 1046, 1048, 1080, 1081, 1100, 1125, 1130, 1132, 1180, 1197, 1198, 1199, 1200, 1207, 1217, 1218, 1219, 1220, 1221, 1222, 1223, 1224, 1237, 1238, 1240, 1241, 1242, 1243, 1244, 1257, 1258, 1259, 1260, 1312, 1348, 1353, 1354, 1388, 1407, 1409, 1434, 1448, 1537, 1567, 1574, 1597, 1612, 1654, 1668, 1713, 1762, 1765, 1766, 1877, 1878, 1984, 2032, 2043, 2054, 2073, 2077, 2092, 2093, 2097, 2107, 2162, 2168, 2214, 2305, 2392, 2409, 2415, 2439, 2459, 2589, 2590, 2633, 2652, 2749, 2834, 2961, 2969, 3005, 3017, 3070, 3071, 3186, 3220, 3289, 3360, 3493, 3494, 3495, 3508, 3588, 3604, 3611, 3668, 3678, 3679, 3690, 3692, 3732, 3738, 3838, 3840, 3927, 3945, 4005, 4006, 4013, 4018, 4019, 4053, 4059, 4124, 4331, 4355, 4357, 4458, 4464, 4500, 4677, 4678, 4684, 4768, 360, 493, 779, 1284, 1306, 1337, 1438, 1709, 2027, 2445, 3407, 3720, 4217, 4288, 95, 96, 296, 316, 443, 479, 555, 562, 637, 671, 709, 740, 743, 796, 857, 897, 899, 915, 953, 1130, 1132, 1294, 1318, 1337, 1348, 1359, 1378, 1427, 1429, 1440, 1537, 1563, 1574, 1709, 1763, 1773, 1819, 1854, 1874, 1936, 1938, 2018, 2043, 2098, 2099, 2256, 2259, 2294, 2514, 2520, 2552, 2589, 2598, 2680, 2706, 2799, 2880, 2897, 2917, 2969, 3020, 3028, 3310, 3319, 3375, 3399, 3504, 3539, 3541, 3679, 3690, 3692, 3718, 3719, 3720, 3738, 3806, 3838, 3840, 3928, 4013, 4017, 4038, 4053, 4057, 4058, 4079, 4097, 4099};
+
+  // hot tower list (pp200 run9) [small list]
+  //const UInt_t hotTwrList[NHotTwr] = {1, 35, 141, 187, 224, 341, 424, 594, 814, 899, 900, 1046, 1128, 1132, 1244, 1382, 1388, 1405, 1588, 1766, 1773, 2066, 2160, 2253, 2281, 2284, 2301, 2303, 2306, 2590, 3007, 3495, 3840, 4043, 4047, 4053, 4057, 4121, 4442, 4569, 4617};
 
   Bool_t isGoodTwr = true;
   for (UInt_t iTwr = 0; iTwr < NHotTwr; iTwr++) {
@@ -409,12 +412,12 @@ Bool_t StJetTreeMaker::IsGoodEvent(const Double_t rVtx, const Double_t zVtx) {
 
 
 
-Bool_t StJetTreeMaker::IsGoodTrigger(const Int_t adc, const Double_t eEta, const Double_t ePhi, const Double_t pProj, const Double_t etaTrg, const Double_t eTtrg, const Double_t tsp) {
+Bool_t StJetTreeMaker::IsGoodTrigger(const Int_t adc, const Double_t eEta, const Double_t ePhi, const Double_t pProj, const Double_t etaDet, const Double_t etaPhys, const Double_t eTtrg, const Double_t tsp) {
 
   const Bool_t isInAdcCut  = (adc <= _adcMax);
   const Bool_t isInStrpCut = ((eEta >= _eEtaMin) && (ePhi >= _ePhiMin));
   const Bool_t isInProjCut = (pProj < _pProjMax);
-  const Bool_t isInEtaCut  = (abs(etaTrg) < _etaTrgMax);
+  const Bool_t isInEtaCut  = ((abs(etaDet) < _etaTrgMax) && (abs(etaPhys) < _etaTrgMax));
   const Bool_t isInEtCut   = ((eTtrg > _eTtrgMin) && (eTtrg < _eTtrgMax));
   const Bool_t isInPi0Cut  = ((tsp > _tspPi0Min) && (tsp < _tspPi0Max));
   const Bool_t isInGamCut  = ((tsp > _tspGamMin) && (tsp < _tspGamMax));

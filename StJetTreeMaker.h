@@ -399,7 +399,7 @@ class StJetTreeMaker {
     Bool_t         IsGoodRunID(const UInt_t runID);
     Bool_t         IsGoodTowerID(const UInt_t twrID);
     Bool_t         IsGoodEvent(const Double_t rVtx, const Double_t zVtx);
-    Bool_t         IsGoodTrigger(const Int_t adc, const Double_t eEta, const Double_t ePhi, const Double_t pProj, const Double_t etaTrg, const Double_t eTtrg, const Double_t tsp);
+    Bool_t         IsGoodTrigger(const Int_t adc, const Double_t eEta, const Double_t ePhi, const Double_t pProj, const Double_t etaDet, const Double_t etaPhys, const Double_t eTtrg, const Double_t tsp);
     Bool_t         IsGoodTrack(const UInt_t nFit, const Double_t rFit, const Double_t dca, const Double_t etaTrk, const Double_t pTtrk);
     Bool_t         IsGoodTower(const Double_t etaTwr, const Double_t eTwr, const Double_t eCorr);
     Bool_t         IsPi0(const Double_t tsp);
